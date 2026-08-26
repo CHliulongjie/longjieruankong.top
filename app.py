@@ -879,6 +879,7 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <div class="header">
+            <img src="/static/images/logo.png" alt="算法穹顶社" style="width: 90px; height: 90px; border-radius: 50%; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
             <h1>🔐 文件加密解密系统</h1>
             <p>由龙解软控设计算法并搭建的加密解密系统</p>
         </div>
@@ -1440,6 +1441,7 @@ def index():
     <body>
         <div class="container">
             <div class="hero">
+                <img src="/static/images/logo.png" alt="算法穹顶社" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
                 <h1>龙解软控</h1>
                 <p>中国中学算法穹顶社个人代理官网以及中国中学学生软件代理</p>
                 <div class="nav-grid">
@@ -1713,7 +1715,7 @@ def homework_mgr():
         <header>
             <div class="container">
                 <nav class="navbar">
-                    <div class="logo">中国中学作业管理系统</div>
+                    <div class="logo"><img src="/static/images/logo.png" alt="算法穹顶社" style="width:45px;height:45px;border-radius:50%;object-fit:cover;"><span>中国中学作业管理系统</span></div>
                     <div class="nav-links">
                         <a href="/">首页</a>
                         <a href="#features">功能特点</a>
@@ -2244,7 +2246,7 @@ def sfqd_club():
             <header>
                 <div class="logo-container">
                     <div class="logo">
-                        <i class="fas fa-code"></i>
+                        <img src="/static/images/logo.png" alt="算法穹顶社" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
                     </div>
                     <div>
                         <div class="logo-text">算法穹顶社</div>
