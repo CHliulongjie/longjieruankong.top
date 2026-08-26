@@ -2382,6 +2382,218 @@ def internal_server_error(error):
     return jsonify({"error": "服务器内部错误，请稍后再试"}), 500
 
 
+# ==================== 发行版管理系统 ====================
+# 为预约系统提供加密文件分发、哈希验证和密码下发功能
+
+# 发行版目录配置
+RELEASE_FOLDER = os.path.join(Config.BASE_DIR, 'release')
+RELEASE_ENCRYPTED_FOLDER = os.path.join(RELEASE_FOLDER, 'encrypted')
+RELEASE_HASHES_FILE = os.path.join(RELEASE_FOLDER, 'hashes.json')
+RELEASE_CONFIG_FILE = os.path.join(RELEASE_FOLDER, 'config.json')
+
+# 发行版密码（客户端验证通过后下发）
+RELEASE_PASSWORD = "算法穹顶26826"
+
+# 确保发行版目录存在
+os.makedirs(RELEASE_ENCRYPTED_FOLDER, exist_ok=True)
+
+
+def load_release_hashes():
+    """加载发行版文件的哈希记录"""
+    if not os.path.exists(RELEASE_HASHES_FILE):
+        return {}
+    try:
+        with open(RELEASE_HASHES_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def save_release_hashes(hashes):
+    """保存发行版文件的哈希记录"""
+    with open(RELEASE_HASHES_FILE, 'w', encoding='utf-8') as f:
+        json.dump(hashes, f, ensure_ascii=False, indent=2)
+
+
+def load_release_config():
+    """加载发行版配置（密码等）"""
+    default_config = {
+        'password': RELEASE_PASSWORD,
+        'version': '1.0.0',
+        'last_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    if not os.path.exists(RELEASE_CONFIG_FILE):
+        return default_config
+    try:
+        with open(RELEASE_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            # 确保 password 字段存在
+            if 'password' not in config:
+                config['password'] = RELEASE_PASSWORD
+            return config
+    except Exception:
+        return default_config
+
+
+def save_release_config(config):
+    """保存发行版配置"""
+    with open(RELEASE_CONFIG_FILE, 'w', encoding='utf-8') as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+
+
+def compute_file_sha256(file_path):
+    """计算文件的 SHA256 哈希值"""
+    import hashlib
+    sha256_hash = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(8192), b''):
+            sha256_hash.update(chunk)
+    return sha256_hash.hexdigest()
+
+
+@app.route('/api/release/verify', methods=['POST'])
+def release_verify():
+    """验证客户端加密文件的哈希值
+
+    请求 JSON: {"files": {"app.py.ljrk": "sha256hex", "index.html.ljrk": "sha256hex", ...}}
+    响应:
+      - 全部匹配: {"status": "ok", "password": "算法穹顶26826"}
+      - 需要更新: {"status": "update", "files": ["app.py.ljrk", ...], "reason": "..."}
+      - 服务器错误: {"status": "error", "message": "..."}
+    """
+    try:
+        data = request.get_json()
+        if not data or 'files' not in data:
+            return jsonify({'status': 'error', 'message': '请求格式错误：需要 files 字段'}), 400
+
+        client_files = data['files']
+        server_hashes = load_release_hashes()
+
+        if not server_hashes:
+            return jsonify({
+                'status': 'error',
+                'message': '服务器尚未配置发行版文件，请联系管理员'
+            }), 500
+
+        # 比对每个文件的哈希值
+        need_update = []
+        for filename, client_hash in client_files.items():
+            server_hash = server_hashes.get(filename)
+            if server_hash is None:
+                # 服务器没有此文件的记录，客户端多了一个文件
+                need_update.append(filename)
+            elif client_hash != server_hash:
+                # 哈希不匹配，需要更新
+                need_update.append(filename)
+
+        # 检查客户端是否缺少服务器上的文件
+        for filename in server_hashes:
+            if filename not in client_files:
+                need_update.append(filename)
+
+        if not need_update:
+            # 全部匹配，返回密码
+            config = load_release_config()
+            app.logger.info(f"发行版验证通过，下发密码")
+            return jsonify({
+                'status': 'ok',
+                'password': config.get('password', RELEASE_PASSWORD),
+                'version': config.get('version', '1.0.0')
+            })
+        else:
+            # 需要更新
+            return jsonify({
+                'status': 'update',
+                'files': need_update,
+                'reason': '核心文件有更新，请下载最新版本',
+                'version': load_release_config().get('version', '1.0.0')
+            })
+
+    except Exception as e:
+        app.logger.error(f"发行版验证失败: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/release/download/<path:filename>')
+def release_download(filename):
+    """下载发行版加密文件
+
+    客户端通过此接口下载需要更新的 .ljrk 文件
+    """
+    try:
+        # 安全检查：防止路径遍历
+        filename = os.path.basename(filename)
+        if not filename.endswith('.ljrk'):
+            return jsonify({'error': '只能下载 .ljrk 加密文件'}), 400
+
+        file_path = os.path.join(RELEASE_ENCRYPTED_FOLDER, filename)
+        if not os.path.exists(file_path):
+            return jsonify({'error': f'文件不存在: {filename}'}), 404
+
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        app.logger.error(f"发行版文件下载失败: {filename}, 错误: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/release/info')
+def release_info():
+    """获取发行版信息（文件列表、版本号等）"""
+    try:
+        server_hashes = load_release_hashes()
+        config = load_release_config()
+        return jsonify({
+            'status': 'ok',
+            'version': config.get('version', '1.0.0'),
+            'last_update': config.get('last_update', ''),
+            'files': list(server_hashes.keys()),
+            'file_count': len(server_hashes)
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
+@app.route('/api/release/refresh', methods=['POST'])
+def release_refresh():
+    """重新计算所有发行版加密文件的哈希值
+
+    管理员上传新的加密文件到 release/encrypted/ 后，
+    调用此接口刷新哈希记录。
+    """
+    try:
+        if not os.path.exists(RELEASE_ENCRYPTED_FOLDER):
+            return jsonify({'error': '发行版加密目录不存在'}), 500
+
+        hashes = {}
+        for filename in os.listdir(RELEASE_ENCRYPTED_FOLDER):
+            if filename.endswith('.ljrk'):
+                file_path = os.path.join(RELEASE_ENCRYPTED_FOLDER, filename)
+                file_hash = compute_file_sha256(file_path)
+                hashes[filename] = file_hash
+                app.logger.info(f"计算哈希: {filename} -> {file_hash}")
+
+        save_release_hashes(hashes)
+
+        # 更新版本信息
+        config = load_release_config()
+        config['last_update'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        save_release_config(config)
+
+        return jsonify({
+            'status': 'ok',
+            'message': f'已刷新 {len(hashes)} 个文件的哈希记录',
+            'files': hashes,
+            'last_update': config['last_update']
+        })
+    except Exception as e:
+        app.logger.error(f"刷新哈希记录失败: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+
 # ==================== 启动代码 ====================
 if __name__ == '__main__':
     print("=" * 50)
@@ -2390,10 +2602,11 @@ if __name__ == '__main__':
     print(f"文件大小限制: {Config.MAX_CONTENT_LENGTH // 1024 // 1024}MB")
     print(f"上传目录: {Config.UPLOAD_FOLDER}")
     print(f"加密文件目录: {Config.ENCRYPTED_FOLDER}")
+    print(f"发行版目录: {RELEASE_FOLDER}")
     print("=" * 50)
 
     # 检查必要的目录
-    for folder in [Config.UPLOAD_FOLDER, Config.ENCRYPTED_FOLDER, Config.LOG_FOLDER]:
+    for folder in [Config.UPLOAD_FOLDER, Config.ENCRYPTED_FOLDER, Config.LOG_FOLDER, RELEASE_ENCRYPTED_FOLDER]:
         if not os.path.exists(folder):
             os.makedirs(folder)
             print(f"创建目录: {folder}")
