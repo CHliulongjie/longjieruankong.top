@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法穹顶社 · 科技社团展示</title>
+    <meta name="description" content="算法穹顶社官方展示页面：活动照片展示。">
+    <link rel="icon" href="/static/images/logo.png">
+    <style>
+        /* SECTION: base */
+        :root {
+            --bg: #05070f;
+            --bg-soft: #0a0f1e;
+            --card: #0d1426;
+            --card-border: rgba(96,165,250,.16);
+            --text: #e7edf8;
+            --text-dim: #9aa7bf;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --grad: linear-gradient(120deg,#22d3ee 0%,#3b82f6 45%,#8b5cf6 100%);
+            --radius: 16px;
+            --nav-h: 72px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            line-height:1.7;
+            overflow-x:hidden;
+        }
+        img{display:block;max-width:100%}
+        a{color:inherit;text-decoration:none}
+        ul{list-style:none}
+        .container{width:min(1180px,92%);margin:0 auto}
+        .section{padding:96px 0;position:relative}
+        .section-head{text-align:center;margin-bottom:56px}
+        .section-tag{
+            display:inline-flex;align-items:center;gap:8px;
+            font-size:13px;letter-spacing:.35em;color:var(--cyan);
+            text-transform:uppercase;margin-bottom:14px;
+        }
+        .section-tag::before,.section-tag::after{
+            content:"";width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan));
+        }
+        .section-tag::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+        .section-title{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:.04em}
+        .section-title .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .section-sub{color:var(--text-dim);margin-top:12px;font-size:15px}
+        /* ========== 导航下拉菜单样式 ========== */
+        .nav-dropdown {
+            position: relative;
+        }
+        .nav-dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            background: rgba(13,20,38,.94);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-top: 6px;
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.24s ease;
+            z-index: 101;
+        }
+        .nav-dropdown-menu a {
+            display: block;
+            padding:10px 20px;
+            color: var(--text-dim);
+        }
+        .nav-dropdown-menu a:hover {
+            color: var(--cyan);
+            background:rgba(34,211,238,.07);
+        }
+        .nav-dropdown:hover .nav-dropdown-menu {
+            opacity:1;
+            visibility:visible;
+            transform: translateY(0);
+        }
+        /* ========== 左侧悬浮循环视频 ========== */
+        .side-video-wrap {
+            width: 200%;
+            max-width: 720px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+        }
+        .side-video-wrap video {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+        }
+        /* SECTION: nav */
+        .site-header{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            height:var(--nav-h);
+            transition:background .3s,box-shadow .3s,border-color .3s;
+            border-bottom:1px solid transparent;
+        }
+        .site-header.scrolled{
+            background:rgba(5,7,15,.82);
+            backdrop-filter:blur(14px);
+            border-bottom-color:rgba(96,165,250,.14);
+            box-shadow:0 8px 32px rgba(0,0,0,.35);
+        }
+        .nav-inner{height:var(--nav-h);display:flex;align-items:center;justify-content:space-between}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-logo{width:44px;height:44px;flex:none;object-fit:cover;border-radius:10px;filter:drop-shadow(0 0 10px rgba(34,211,238,.45))}
+        .brand-name{font-size:19px;font-weight:800;letter-spacing:.08em}
+        .brand-name small{display:block;font-size:10px;font-weight:500;color:var(--text-dim);letter-spacing:.42em;margin-top:1px}
+        .nav-links{display:flex;align-items:center;gap:6px}
+        .nav-links a{
+            padding:9px 18px;border-radius:10px;font-size:15px;color:var(--text-dim);
+            transition:color .25s,background .25s;position:relative;
+        }
+        .nav-links a:hover{color:var(--text)}
+        .nav-links a.active{color:var(--cyan);background:rgba(34,211,238,.08)}
+        .nav-cta{
+            margin-left:12px;padding:9px 22px !important;border-radius:999px;
+            background:var(--grad);color:#fff !important;font-weight:700;
+            box-shadow:0 4px 18px rgba(59,130,246,.4);
+        }
+        .nav-toggle{display:none;background:none;border:0;width:44px;height:44px;cursor:pointer;position:relative;z-index:110}
+        .nav-toggle span{display:block;width:22px;height:2px;background:var(--text);margin:5px auto;border-radius:2px;transition:transform .3s,opacity .3s}
+        .nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-toggle.open span:nth-child(2){opacity:0}
+        .nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        /* SECTION: hero */
+        .hero{
+            min-height:100vh;display:flex;align-items:center;justify-content:center;
+            position:relative;overflow:hidden;padding:calc(var(--nav-h) + 40px) 0 80px;
+        }
+        #hero-canvas{position:absolute;inset:0;width:100%;height:100%}
+        .hero-grid{
+            position:absolute;inset:0;pointer-events:none;
+            background-image:linear-gradient(rgba(59,130,246,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.06) 1px,transparent 1px);
+            background-size:56px 56px;
+            mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 75%);
+        }
+        .hero-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;pointer-events:none;animation:floaty 9s ease-in-out infinite alternate}
+        .hero-glow.g1{width:480px;height:480px;background:#0e7490;top:-140px;left:-120px}
+        .hero-glow.g2{width:420px;height:420px;background:#5b21b6;bottom:-120px;right:-100px;animation-delay:-4s}
+        @keyframes floaty{from{transform:translateY(-18px)}to{transform:translateY(22px)}}
+        .hero-content{position:relative;z-index:2;text-align:center}
+        .hero-logo{width:96px;height:96px;margin:0 auto 26px;object-fit:cover;border-radius:18px;filter:drop-shadow(0 0 26px rgba(34,211,238,.55));animation:pulse 3.2s ease-in-out infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        .hero-badge{
+            display:inline-flex;align-items:center;gap:10px;padding:8px 20px;border-radius:999px;
+            border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.07);
+            font-size:13px;letter-spacing:.28em;color:var(--cyan);margin-bottom:26px;
+        }
+        .hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:blink 1.6s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+        .hero h1{
+            font-size:clamp(38px,6.5vw,72px);font-weight:900;letter-spacing:.06em;line-height:1.18;
+        }
+        .hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .hero-slogan{margin-top:18px;font-size:clamp(15px,2vw,19px);color:var(--text-dim);letter-spacing:.14em}
+        .stat{text-align:center}
+        .stat b{font-size:clamp(26px,3.4vw,40px);font-weight:900;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .stat span{display:block;font-size:13px;color:var(--text-dim);letter-spacing:.12em;margin-top:4px}
+        .btn{
+            display:inline-flex;align-items:center;gap:8px;padding:14px 34px;border-radius:999px;
+            font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer;border:0;
+            transition:transform .25s,box-shadow .25s,background .25s;
+        }
+        .btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 28px rgba(59,130,246,.45)}
+        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(34,211,238,.5)}
+        .btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(148,163,184,.4)}
+        .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-3px)}
+        .scroll-hint{
+            position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+            color:var(--text-dim);font-size:12px;letter-spacing:.3em;z-index:2;
+        }
+        .scroll-hint::after{
+            content:"";display:block;width:1px;height:34px;margin:10px auto 0;
+            background:linear-gradient(180deg,var(--cyan),transparent);animation:drop 1.8s infinite;
+        }
+        @keyframes drop{from{transform:scaleY(0);transform-origin:top}to{transform:scaleY(1);transform-origin:top}}
+        /* NEW SECTION: Scrolling Gallery Strip */
+        .gallery-strip-container {
+            margin-top: 40px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+        .gallery-track {
+            display: flex;
+            gap: 16px;
+            width: max-content;
+            animation: scroll-left 30s linear infinite;
+        }
+        .gallery-track:hover {
+            animation-play-state: paused;
+        }
+        .gallery-track img {
+            height: 140px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+        }
+        .gallery-track img:hover {
+            transform: scale(1.05);
+            border-color: var(--cyan);
+        }
+        @keyframes scroll-left {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        /* ========== 社团介绍板块 ========== */
+        #intro{
+            background: var(--bg-soft);
+        }
+        .intro-card{
+            max-width:720px;
+            margin:0 auto;
+            background: var(--card);
+            border:1px solid var(--card-border);
+            border-radius: var(--radius);
+            padding:40px;
+        }
+        .intro-card p{
+            color: var(--text-dim);
+            margin-bottom:16px;
+            font-size:16px;
+        }
+        /* SECTION: footer */
+        .site-footer{
+            padding:40px 0;border-top:1px solid rgba(148,163,184,.1);
+            text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.06em;
+        }
+        .site-footer a{color:var(--cyan)}
+        /* SECTION: lightbox */
+        .lightbox{
+            position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);
+            display:none;align-items:center;justify-content:center;
+            backdrop-filter:blur(10px);
+        }
+        .lightbox.open{display:flex}
+        .lightbox img{max-width:90vw;max-height:85vh;border-radius:12px;box-shadow:0 0 60px rgba(0,0,0,.6)}
+        .lightbox-close{
+            position:absolute;top:24px;right:32px;width:44px;height:44px;
+            border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.5);
+            color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+            transition:background .2s;
+        }
+        .lightbox-close:hover{background:rgba(255,255,255,.15)}
+        .lightbox-nav{
+            position:absolute;top:50%;transform:translateY(-50%);
+            width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.2);
+            background:rgba(0,0,0,.5);color:#fff;font-size:24px;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;transition:background .2s;
+        }
+        .lightbox-nav:hover{background:rgba(255,255,255,.15)}
+        .lightbox-prev{left:24px}
+        .lightbox-next{right:24px}
+        /* SECTION: responsive */
+       @media(max-width:900px){
+    .depts{grid-template-columns:1fr 1fr}
+    .side-video-wrap{
+        max-width: 100%;
+    }
+}
+        @media(max-width:640px){
+            .nav-links{
+                position:fixed;top:0;right:-100%;width:72vw;max-width:320px;height:100vh;
+                background:rgba(10,15,30,.97);backdrop-filter:blur(20px);
+                flex-direction:column;padding:100px 32px 40px;gap:8px;
+                transition:right .35s;border-left:1px solid var(--card-border);
+            }
+            .nav-links.open{right:0}
+            .nav-toggle{display:block}
+            .depts{grid-template-columns:1fr}
+            .hero h1{font-size:clamp(30px,8vw,48px)}
+            .gallery-track img{height:100px}
+            /* 移动端下拉菜单改为静态 */
+            .nav-dropdown-menu{
+                position:static;
+                transform:none;
+                opacity:1;
+                visibility:visible;
+                background:transparent;
+                border:none;
+                margin-top:0;
+                padding-left:12px;
+            }
+        }
+        /* ========== 社团成就板块 ========== */
+#achievements {
+    background: var(--bg-soft);
+    padding: 96px 0;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.achievement-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.achievement-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    border-color: var(--cyan);
+}
+
+.achievement-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 16px;
+    color: var(--cyan);
+}
+
+.achievement-card h3 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--text);
+}
+
+.achievement-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.achievement-card li {
+    color: var(--text-dim);
+    font-size: 15px;
+    line-height: 1.8;
+    padding-left: 20px;
+    position: relative;
+}
+
+.achievement-card li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--cyan);
+    font-weight: 700;
+}
+
+/* 移动端：两列变一列 */
+@media (max-width: 640px) {
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- ====== HEADER / NAV ====== -->
+    <header class="site-header" id="siteHeader">
+        <div class="container nav-inner">
+            <a href="/sfqd-club" class="brand">
+                <img class="brand-logo" src="/static/club/logo.png" alt="算法穹顶社图标">
+                <div class="brand-name">算法穹顶社</div>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="#hero" class="active">首页</a>
+                <a href="#brief">社团介绍</a>
+                <a href="#intro" class="nav-dropdown-toggle">社团项目</a>
+                <a href="#achievements">社团成就</a>
+                <a href="/club-assets">社团资产</a>
+                <a href="/join" class="nav-cta">加入我们</a>
+            </nav>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+    <!-- ====== HERO ====== -->
+    <section class="hero" id="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-grid"></div>
+        <div class="hero-glow g1"></div>
+        <div class="hero-glow g2"></div>
+        <div class="hero-content">
+            <img class="hero-logo" src="/static/club/logo.png" alt="算法穹顶社">
+            <div class="hero-badge"><span class="dot"></span>2026 纳新进行中</div>
+            <h1>探索科技<br><span class="grad">点燃未来</span></h1>
+            <p class="hero-slogan">以代码为笔，以创意为墨，书写属于你的科技篇章</p>
+            <!-- 横向滚动照片条 -->
+            <div class="gallery-strip-container" id="galleryStrip">
+                <div class="gallery-track" id="galleryTrack">
+                    <!-- JS 动态填充 -->
+                </div>
+            </div>
+        </div>
+        <div class="scroll-hint">SCROLL</div>
+    </section>
+    <!-- ========== 社团简介板块（新增：滚动图片下方，社团介绍上方） ========== -->
+<section id="brief" class="section">
+    <div class="container">
+        <div class="section-head">
+            <div class="section-tag">BRIEF INTRO</div>
+            <h2 class="section-title"><span class="grad">社团介绍</span></h2>
+            <p class="section-sub">快速了解算法穹顶社</p>
+        </div>
+        <div class="intro-card" style="max-width:720px;margin:0 auto;">
+            <p>中国中学算法穹顶社成立于2025年9月，是中国中学历史上第一个专注于科技领域的学生社团。我们致力于通过算法和编程教育，改变学生对问题的思考方式，培养创新思维和解决问题的能力。</p>
+            <p>社团面向所有对编程、算法和工程项目感兴趣的同学开放，无论你是初学者还是有一定基础的技术爱好者，都能在这里找到成长的空间和展示的舞台。</p>
+            <p>我们定期组织技术培训、项目开发和竞赛准备活动，帮助社员提升技术水平，参加市级和区级的各类科技竞赛，并在实际项目中应用所学知识解决校园和社会的现实问题。</p>
+        </div>
+    </div>
+</section>
+
+    <!-- ========== 社团介绍板块 ========== -->
+    <section id="intro" class="section">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-tag">ABOUT US</div>
+                <h2 class="section-title"><span class="grad">社团项目</span></h2>
+                <p class="section-sub">了解算法穹顶社，与热爱代码的伙伴一同成长</p>
+            </div>
+            <!-- 第一个视频 -->
+            <div class="side-video-wrap">
+                <video src="/static/club/intro.mp4" autoplay loop muted playsinline></video>
+            </div>
+
+            <!-- 两个视频中间文字卡片 -->
+            <div class="intro-card" style="margin:24px auto;">
+                <p>化学探索｜交互式化学科普网站。基于 Flask 搭建，包含完整 118 号元素交互周期表、化学反应原理科普，炫酷星空动画 UI。点击元素查看原子参数、电子排布、趣味科普；讲解活化、过渡、有效碰撞、成键等反应基础知识。响应式适配移动端，数据与页面分离，方便拓展更多化学学习内容。</p>
+            </div>
+            <!-- 第二个视频 -->
+            <div class="side-video-wrap">
+                <video src="/static/club/intro2.mp4" autoplay loop muted playsinline></video>
+            </div>
+
+            <!-- 第二个视频下方新增文字卡片 -->
+            <div class="intro-card" style="margin-top:24px;">
+                <p>这是中学场馆预约系统网页，可预约多种场馆，当前显示羽毛球场页面。它有 6 个场地，于周一、周二、周四的 00:00 - 20:00 开放。用户可切换日期查看场地状态，目前各场地均空闲且可预约，点击 "立即预约" 按钮就能进行场地预订操作。</p>
+            </div>
+        </div>
+    </section>
+    <!-- ========== 社团成就板块 ========== -->
+<section id="achievements" class="section">
+    <div class="container">
+        <div class="section-head">
+            <div class="section-tag">ACHIEVEMENTS</div>
+            <h2 class="section-title"><span class="grad">社团成就</span></h2>
+            <p class="section-sub">以竞赛锤炼能力，用成绩证明热爱</p>
+        </div>
+
+        <div class="achievements-grid">
+            <!-- 左侧：竞赛荣誉 -->
+            <div class="achievement-card">
+                <svg class="achievement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2"></path>
+                    <path d="M6 9V7a6 6 0 0 1 12 0v2"></path>
+                    <path d="M12 13v6"></path>
+                    <path d="M8 13h8"></path>
+                </svg>
+                <h3>竞赛荣誉</h3>
+                <ul>
+                    <li>加拿大计算机竞赛（BCC）</li>
+                    <li>加拿大计算机竞赛（CCC）</li>
+                    <li>第五届长三角人工智能奥林匹克挑战赛</li>
+                </ul>
+            </div>
+
+            <!-- 右侧：预留空白卡片 -->
+            <div class="achievement-card">
+                <svg class="achievement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <h3>更多成就</h3>
+                <ul>
+                    <li>第六届长三角人工智能奥林匹克挑战赛：网安守护者二等奖</li>
+                    <li>第六届长三角人工智能奥林匹克挑战赛：深度赛车二等奖</li>
+                    <li>持续更新中</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- ====== LIGHTBOX ====== -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lbClose">✕</button>
+        <button class="lightbox-nav lightbox-prev" id="lbPrev">‹</button>
+        <img src="" alt="大图预览" id="lbImg">
+        <button class="lightbox-nav lightbox-next" id="lbNext">›</button>
+    </div>
+    <!-- ====== FOOTER ====== -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 算法穹顶社 · 用热爱点亮每一行代码</p>
+            <p style="margin-top:8px;font-size:12px;opacity:.6;"><a href="/club-admin">管理入口</a></p>
+        </div>
+    </footer>
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+    (function(){
+        /* ---- Nav scroll effect ---- */
+        const header = document.getElementById('siteHeader');
+        window.addEventListener('scroll', () => {
+            header.classList.toggle('scrolled', window.scrollY > 40);
+        });
+        /* ---- Mobile nav toggle ---- */
+        const toggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
+        /* ---- Active nav link on scroll ---- */
+        const sections = document.querySelectorAll('section[id]');
+        const navAs = navLinks.querySelectorAll('a[href^="#"]');
+        window.addEventListener('scroll', () => {
+            let cur = '';
+            sections.forEach(s => {
+                if(window.scrollY >= s.offsetTop - 200) cur = s.id;
+            });
+            navAs.forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + cur);
+            });
+        });
+        /* ---- Hero canvas particles ---- */
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resizeCanvas(){
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        class Particle {
+            constructor(){this.reset()}
+            reset(){
+                this.x = Math.random()*canvas.width;
+                this.y = Math.random()*canvas.height;
+                this.vx = (Math.random()-.5)*.4;
+                this.vy = (Math.random()-.5)*.4;
+                this.r = Math.random()*1.8+.5;
+                this.alpha = Math.random()*.5+.15;
+            }
+            update(){
+                this.x += this.vx; this.y += this.vy;
+                if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset();
+            }
+            draw(){
+                ctx.beginPath();
+                ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+                ctx.fillStyle=`rgba(34,211,238,${this.alpha})`;
+                ctx.fill();
+            }
+        }
+        for(let i=0;i<80;i++) particles.push(new Particle());
+        function animate(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p=>{p.update();p.draw()});
+            // draw lines
+            for(let i=0;i<particles.length;i++){
+                for(let j=i+1;j<particles.length;j++){
+                    const dx=particles[i].x-particles[j].x;
+                    const dy=particles[i].y-particles[j].y;
+                    const dist=Math.sqrt(dx*dx+dy*dy);
+                    if(dist<120){
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x,particles[i].y);
+                        ctx.lineTo(particles[j].x,particles[j].y);
+                        ctx.strokeStyle=`rgba(59,130,246,${.12*(1-dist/120)})`;
+                        ctx.lineWidth=.6;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+        /* ---- Gallery: load images from folder ---- */
+        const galleryImages = [
+            "1.jpg",
+            "2.jpg",
+            "3.jpg",
+            "4.jpg",
+            "5.jpg",
+            "6.jpg",
+            "7.jpg",
+            "8.jpg"
+        ];
+        // 尝试从 list.json 动态读取（如果存在则覆盖上面的数组）
+        fetch('/static/club/gallery/list.json')
+            .then(r => r.json())
+            .then(files => {
+                if(Array.isArray(files) && files.length) buildGallery(files);
+            })
+            .catch(() => {
+                // list.json 不存在或为空，使用上面手动定义的数组
+                buildGallery(galleryImages);
+            });
+        function buildGallery(files){
+            const track = document.getElementById('galleryTrack');
+            track.innerHTML = '';
+            // 生成两组图片实现无缝滚动
+            const allFiles = files.concat(files);
+            allFiles.forEach((file, idx) => {
+                const img = document.createElement('img');
+                img.src = '/static/club/gallery/' + file;
+                img.alt = '社团活动照片';
+                img.loading = 'lazy';
+                img.addEventListener('click', () => openLightbox(idx % files.length, files));
+                track.appendChild(img);
+            });
+        }
+        /* ---- Lightbox ---- */
+        const lightbox = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lbImg');
+        let currentFiles = [];
+        let currentIndex = 0;
+        function openLightbox(idx, files){
+            currentFiles = files;
+            currentIndex = idx;
+            lbImg.src = '/static/club/gallery/' + files[idx];
+            lightbox.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox(){
+            lightbox.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        document.getElementById('lbClose').addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', e => { if(e.target === lightbox) closeLightbox(); });
+        document.getElementById('lbPrev').addEventListener('click', e => {
+            e.stopPropagation();
+            currentIndex = (currentIndex - 1 + currentFiles.length) % currentFiles.length;
+            lbImg.src = '/static/club/gallery/' + currentFiles[currentIndex];
+        });
+        document.getElementById('lbNext').addEventListener('click', e => {
+            e.stopPropagation();
+            currentIndex = (currentIndex + 1) % currentFiles.length;
+            lbImg.src = '/static/club/gallery/' + currentFiles[currentIndex];
+        });
+        document.addEventListener('keydown', e => {
+            if(!lightbox.classList.contains('open')) return;
+            if(e.key === 'Escape') closeLightbox();
+            if(e.key === 'ArrowLeft') document.getElementById('lbPrev').click();
+            if(e.key === 'ArrowRight') document.getElementById('lbNext').click();
+        });
+    })();
+    </script>
+</body>
+</html>

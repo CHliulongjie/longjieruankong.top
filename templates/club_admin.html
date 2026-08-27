@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 · 算法穹顶社</title>
+    <link rel="icon" href="/static/images/logo.png">
+    <style>
+        :root {
+            --bg: #05070f;
+            --bg-soft: #0a0f1e;
+            --card: #0d1426;
+            --card-border: rgba(96,165,250,.16);
+            --text: #e7edf8;
+            --text-dim: #9aa7bf;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --grad: linear-gradient(120deg,#22d3ee 0%,#3b82f6 45%,#8b5cf6 100%);
+            --radius: 16px;
+            --nav-h: 72px;
+            --green: #34d399;
+            --red: #f87171;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            line-height:1.7;
+            overflow-x:hidden;
+            min-height:100vh;
+        }
+        img{display:block;max-width:100%}
+        a{color:inherit;text-decoration:none}
+        .container{width:min(1180px,92%);margin:0 auto}
+        /* SECTION: nav */
+        .site-header{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            height:var(--nav-h);
+            background:rgba(5,7,15,.82);
+            backdrop-filter:blur(14px);
+            border-bottom:1px solid rgba(96,165,250,.14);
+            box-shadow:0 8px 32px rgba(0,0,0,.35);
+        }
+        .nav-inner{height:var(--nav-h);display:flex;align-items:center;justify-content:space-between}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-logo{width:44px;height:44px;flex:none;object-fit:cover;border-radius:10px;filter:drop-shadow(0 0 10px rgba(34,211,238,.45))}
+        .brand-name{font-size:19px;font-weight:800;letter-spacing:.08em}
+        .nav-links{display:flex;align-items:center;gap:6px}
+        .nav-links a{
+            padding:9px 18px;border-radius:10px;font-size:15px;color:var(--text-dim);
+            transition:color .25s,background .25s;position:relative;
+        }
+        .nav-links a:hover{color:var(--text)}
+        .nav-links a.active{color:var(--cyan);background:rgba(34,211,238,.08)}
+        .nav-cta{
+            margin-left:12px;padding:9px 22px !important;border-radius:999px;
+            background:var(--grad);color:#fff !important;font-weight:700;
+            box-shadow:0 4px 18px rgba(59,130,246,.4);
+        }
+        .nav-toggle{display:none;background:none;border:0;width:44px;height:44px;cursor:pointer;position:relative;z-index:110}
+        .nav-toggle span{display:block;width:22px;height:2px;background:var(--text);margin:5px auto;border-radius:2px;transition:transform .3s,opacity .3s}
+        .nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-toggle.open span:nth-child(2){opacity:0}
+        .nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        /* SECTION: main */
+        .main-section{padding:calc(var(--nav-h) + 40px) 0 60px;min-height:100vh}
+        .page-head{text-align:center;margin-bottom:40px}
+        .section-tag{
+            display:inline-flex;align-items:center;gap:8px;
+            font-size:13px;letter-spacing:.35em;color:var(--cyan);
+            text-transform:uppercase;margin-bottom:14px;
+        }
+        .section-tag::before,.section-tag::after{
+            content:"";width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan));
+        }
+        .section-tag::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+        .page-head h1{
+            font-size:clamp(28px,4vw,42px);font-weight:900;letter-spacing:.04em;
+        }
+        .page-head h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        /* SECTION: card */
+        .card{
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:var(--radius);
+            padding:32px 28px;
+            margin-bottom:24px;
+            box-shadow:0 12px 40px rgba(0,0,0,.4);
+        }
+        .card-title{
+            font-size:18px;font-weight:700;margin-bottom:20px;color:var(--text);
+            display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+        }
+        /* SECTION: login form */
+        .login-card{max-width:440px;margin:0 auto}
+        .form-group{margin-bottom:20px}
+        .form-group label{
+            display:block;font-size:14px;font-weight:600;color:var(--text);
+            margin-bottom:10px;letter-spacing:.04em;
+        }
+        .form-control{
+            width:100%;padding:12px 16px;
+            background:rgba(5,7,15,.6);
+            border:1px solid rgba(96,165,250,.2);
+            border-radius:10px;
+            color:var(--text);font-size:15px;
+            font-family:inherit;
+            transition:border-color .25s,box-shadow .25s,background .25s;
+            outline:none;
+        }
+        .form-control::placeholder{color:rgba(154,167,191,.5)}
+        .form-control:focus{
+            border-color:var(--cyan);
+            box-shadow:0 0 0 3px rgba(34,211,238,.15);
+            background:rgba(5,7,15,.85);
+        }
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:8px;
+            padding:13px 28px;border-radius:999px;
+            font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:0;
+            transition:transform .25s,box-shadow .25s,background .25s,opacity .25s;
+        }
+        .btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 28px rgba(59,130,246,.45)}
+        .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(34,211,238,.5)}
+        .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(148,163,184,.4)}
+        .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+        .btn-block{width:100%}
+        .btn-sm{padding:8px 18px;font-size:13px}
+        /* SECTION: alert */
+        .alert{
+            padding:12px 16px;border-radius:10px;margin-bottom:18px;
+            font-size:14px;display:none;align-items:center;gap:10px;
+        }
+        .alert.show{display:flex}
+        .alert.success{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);color:var(--cyan)}
+        .alert.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+        /* SECTION: status toggle */
+        .status-row{
+            display:flex;align-items:center;justify-content:space-between;
+            gap:16px;flex-wrap:wrap;
+        }
+        .status-badge{
+            display:inline-flex;align-items:center;gap:10px;
+            padding:8px 18px;border-radius:999px;font-size:14px;font-weight:600;
+        }
+        .status-badge.open{
+            background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.4);color:var(--green);
+        }
+        .status-badge.closed{
+            background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.4);color:var(--red);
+        }
+        .status-badge .dot{width:9px;height:9px;border-radius:50%}
+        .status-badge.open .dot{background:var(--green);box-shadow:0 0 10px var(--green)}
+        .status-badge.closed .dot{background:var(--red);box-shadow:0 0 10px var(--red)}
+        /* SECTION: stats */
+        .stats-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+            gap:14px;margin-bottom:24px;
+        }
+        .stat-box{
+            background:rgba(5,7,15,.5);
+            border:1px solid var(--card-border);
+            border-radius:12px;padding:18px;text-align:center;
+        }
+        .stat-box b{
+            display:block;font-size:clamp(22px,3vw,32px);font-weight:900;
+            background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+        }
+        .stat-box span{font-size:13px;color:var(--text-dim);letter-spacing:.06em}
+        .class-distribution{
+            display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+            gap:8px;
+        }
+        .class-bar{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:8px 14px;background:rgba(5,7,15,.4);
+            border:1px solid var(--card-border);border-radius:8px;
+            font-size:13px;
+        }
+        .class-bar .name{color:var(--text-dim)}
+        .class-bar .count{color:var(--cyan);font-weight:700}
+        /* SECTION: table */
+        .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--card-border)}
+        table{width:100%;border-collapse:collapse;min-width:560px}
+        thead{background:rgba(5,7,15,.6)}
+        th{
+            padding:12px 16px;text-align:left;font-size:13px;font-weight:600;
+            color:var(--text-dim);letter-spacing:.06em;border-bottom:1px solid var(--card-border);
+            white-space:nowrap;
+        }
+        td{
+            padding:12px 16px;font-size:14px;color:var(--text);
+            border-bottom:1px solid rgba(96,165,250,.08);
+        }
+        tbody tr:hover{background:rgba(34,211,238,.04)}
+        tbody tr:last-child td{border-bottom:0}
+        .empty-row td{text-align:center;color:var(--text-dim);padding:32px}
+        .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+        /* SECTION: hidden */
+        .hidden{display:none !important}
+        /* SECTION: footer */
+        .site-footer{
+            padding:32px 0;border-top:1px solid rgba(148,163,184,.1);
+            text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.06em;
+        }
+        /* responsive */
+        @media(max-width:640px){
+            .nav-links{
+                position:fixed;top:0;right:-100%;width:72vw;max-width:320px;height:100vh;
+                background:rgba(10,15,30,.97);backdrop-filter:blur(20px);
+                flex-direction:column;padding:100px 32px 40px;gap:8px;
+                transition:right .35s;border-left:1px solid var(--card-border);
+            }
+            .nav-links.open{right:0}
+            .nav-toggle{display:block}
+            .card{padding:24px 18px}
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HEADER / NAV ====== -->
+    <header class="site-header" id="siteHeader">
+        <div class="container nav-inner">
+            <a href="/sfqd-club" class="brand">
+                <img class="brand-logo" src="/static/club/logo.png" alt="算法穹顶社图标">
+                <div class="brand-name">算法穹顶社</div>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="/sfqd-club">首页</a>
+                <a href="/sfqd-club#brief">社团介绍</a>
+                <a href="/sfqd-club#intro">社团项目</a>
+                <a href="/sfqd-club#achievements">社团成就</a>
+                <a href="/join" class="nav-cta">加入我们</a>
+            </nav>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== MAIN ====== -->
+    <section class="main-section">
+        <div class="container">
+            <div class="page-head">
+                <div class="section-tag">ADMIN</div>
+                <h1>报名<span class="grad">管理后台</span></h1>
+            </div>
+
+            <!-- ===== 登录卡片（未登录） ===== -->
+            <div class="card login-card" id="loginCard">
+                <div class="card-title">管理员登录</div>
+                <div class="alert" id="alertBox"></div>
+                <form id="loginForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                               placeholder="管理员账号" maxlength="40" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="管理员密码" maxlength="60" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" id="loginBtn">登录</button>
+                </form>
+            </div>
+
+            <!-- ===== 管理面板（已登录） ===== -->
+            <div id="adminPanel" class="hidden">
+                <!-- 状态卡 -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>报名通道状态</span>
+                        <div class="status-row">
+                            <span class="status-badge closed" id="statusBadge">
+                                <span class="dot"></span><span id="statusText">已关闭</span>
+                            </span>
+                            <button class="btn btn-sm btn-ghost" id="toggleBtn">开启报名</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计卡 -->
+                <div class="card">
+                    <div class="card-title">报名统计</div>
+                    <div class="stats-grid" id="statsGrid">
+                        <div class="stat-box"><b id="statTotal">0</b><span>总报名人数</span></div>
+                    </div>
+                    <div class="class-distribution" id="classDistribution"></div>
+                </div>
+
+                <!-- 列表卡 -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>报名列表</span>
+                        <div class="toolbar">
+                            <button class="btn btn-sm btn-ghost" id="refreshBtn">刷新</button>
+                            <button class="btn btn-sm btn-ghost" id="exportBtn">导出 Excel</button>
+                            <button class="btn btn-sm btn-ghost" id="logoutBtn">退出登录</button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>提交时间</th>
+                                    <th>班级</th>
+                                    <th>姓名</th>
+                                    <th>联系方式</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr class="empty-row"><td colspan="4">暂无报名数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 算法穹顶社 · 用热爱点亮每一行代码</p>
+        </div>
+    </footer>
+
+    <script>
+    (function(){
+        /* ---- Mobile nav toggle ---- */
+        const toggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
+
+        /* ---- Elements ---- */
+        const loginCard = document.getElementById('loginCard');
+        const adminPanel = document.getElementById('adminPanel');
+        const alertBox = document.getElementById('alertBox');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        const statTotal = document.getElementById('statTotal');
+        const classDistribution = document.getElementById('classDistribution');
+        const tableBody = document.getElementById('tableBody');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        /* ---- Alert helper ---- */
+        function showAlert(type, msg){
+            alertBox.className = 'alert ' + type + ' show';
+            alertBox.textContent = msg;
+        }
+        function hideAlert(){
+            alertBox.className = 'alert';
+            alertBox.textContent = '';
+        }
+
+        /* ---- Render status ---- */
+        function renderStatus(status){
+            if(status === 'open'){
+                statusBadge.className = 'status-badge open';
+                statusText.textContent = '报名开放中';
+                toggleBtn.textContent = '关闭报名';
+            } else {
+                statusBadge.className = 'status-badge closed';
+                statusText.textContent = '报名已关闭';
+                toggleBtn.textContent = '开启报名';
+            }
+        }
+
+        /* ---- Render list ---- */
+        function renderList(data){
+            // 统计
+            statTotal.textContent = data.total || 0;
+            // 班级分布
+            const byClass = data.by_class || {};
+            classDistribution.innerHTML = '';
+            const classList = Object.keys(byClass).sort();
+            if(classList.length === 0){
+                classDistribution.innerHTML = '<div style="color:var(--text-dim);font-size:13px;grid-column:1/-1;">暂无数据</div>';
+            } else {
+                classList.forEach(c => {
+                    const el = document.createElement('div');
+                    el.className = 'class-bar';
+                    el.innerHTML = '<span class="name">' + escapeHtml(c) + '</span><span class="count">' + byClass[c] + ' 人</span>';
+                    classDistribution.appendChild(el);
+                });
+            }
+            // 表格
+            const subs = data.submissions || [];
+            tableBody.innerHTML = '';
+            if(subs.length === 0){
+                tableBody.innerHTML = '<tr class="empty-row"><td colspan="4">暂无报名数据</td></tr>';
+                return;
+            }
+            subs.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + escapeHtml(s.提交时间 || '') + '</td>'
+                              + '<td>' + escapeHtml(s.班级 || '') + '</td>'
+                              + '<td>' + escapeHtml(s.姓名 || '') + '</td>'
+                              + '<td>' + escapeHtml(s.联系方式 || '') + '</td>';
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function escapeHtml(s){
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+            }[c]));
+        }
+
+        /* ---- Load list ---- */
+        async function loadList(){
+            try {
+                const r = await fetch('/api/club/list');
+                if(r.status === 401){
+                    showLogin();
+                    return;
+                }
+                const data = await r.json();
+                renderStatus(data.status);
+                renderList(data);
+            } catch(err){
+                tableBody.innerHTML = '<tr class="empty-row"><td colspan="4">加载失败：' + escapeHtml(err.message) + '</td></tr>';
+            }
+        }
+
+        /* ---- Show login / admin ---- */
+        function showLogin(){
+            loginCard.classList.remove('hidden');
+            adminPanel.classList.add('hidden');
+        }
+        function showAdmin(){
+            loginCard.classList.add('hidden');
+            adminPanel.classList.remove('hidden');
+            loadList();
+        }
+
+        /* ---- Check login status on load ---- */
+        fetch('/api/club/me')
+            .then(r => r.json())
+            .then(data => {
+                if(data.logged_in){
+                    showAdmin();
+                } else {
+                    showLogin();
+                }
+            })
+            .catch(() => showLogin());
+
+        /* ---- Login submit ---- */
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+            const payload = {
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value.trim()
+            };
+            if(!payload.username || !payload.password){
+                showAlert('error', '请输入用户名和密码');
+                return;
+            }
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            try {
+                const r = await fetch('/api/club/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await r.json();
+                if(data.success){
+                    showAdmin();
+                    loginForm.reset();
+                } else {
+                    showAlert('error', data.error || '登录失败');
+                }
+            } catch(err){
+                showAlert('error', '网络错误：' + err.message);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+
+        /* ---- Toggle status ---- */
+        toggleBtn.addEventListener('click', async () => {
+            toggleBtn.disabled = true;
+            try {
+                const r = await fetch('/api/club/toggle', {method: 'POST'});
+                const data = await r.json();
+                if(data.success){
+                    renderStatus(data.status);
+                }
+            } catch(err){
+                console.error(err);
+            } finally {
+                toggleBtn.disabled = false;
+            }
+        });
+
+        /* ---- Refresh ---- */
+        refreshBtn.addEventListener('click', loadList);
+
+        /* ---- Export ---- */
+        exportBtn.addEventListener('click', () => {
+            window.location.href = '/api/club/export';
+        });
+
+        /* ---- Logout ---- */
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/club/logout', {method: 'POST'});
+            } catch(e){}
+            showLogin();
+        });
+    })();
+    </script>
+</body>
+</html>

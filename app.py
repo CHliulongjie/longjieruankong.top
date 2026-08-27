@@ -4,7 +4,7 @@ import json
 import logging
 import shutil
 from datetime import datetime
-from flask import Flask, request, jsonify, send_file, render_template_string
+from flask import Flask, request, jsonify, send_file, render_template_string, session
 from flask_cors import CORS
 from flask import render_template_string
 import ssl
@@ -12,6 +12,8 @@ from waitress import create_server
 from flask import render_template
 import traceback
 import pandas as pd
+import urllib.request
+import urllib.error
 
 
 # ==================== 配置区域 ====================
@@ -22,6 +24,9 @@ class Config:
 
     # 文件大小限制 (100MB)
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
+
+    # Flask session 密钥（管理后台登录用）
+    SECRET_KEY = 'longjieruankong-top-sfqd-2026'
 
     # 文件路径配置
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -382,9 +387,33 @@ def init_excel_file():
 # 初始化Excel文件
 init_excel_file()
 
+
+# ==================== 社团报名数据 ====================
+CLUB_JOIN_FILE = os.path.join(Config.BASE_DIR, 'join_data.xlsx')
+# xyz 服务器登录路由（与预约系统管理员验证逻辑一致）
+CLUB_LOGIN_SERVER_URL = 'https://longjieruankong.xyz/login'
+
+
+def init_club_join_file():
+    """初始化社团报名数据文件（submissions + config 两个 sheet）"""
+    if not os.path.exists(CLUB_JOIN_FILE):
+        df = pd.DataFrame(columns=['提交时间', '班级', '姓名', '联系方式'])
+        cfg = pd.DataFrame([{'status': 'closed'}])
+        with pd.ExcelWriter(CLUB_JOIN_FILE) as writer:
+            df.to_excel(writer, sheet_name='submissions', index=False)
+            cfg.to_excel(writer, sheet_name='config', index=False)
+        print(f"创建社团报名数据文件: {CLUB_JOIN_FILE}")
+    else:
+        print(f"社团报名数据文件已存在: {CLUB_JOIN_FILE}")
+
+
+# 初始化社团报名数据文件
+init_club_join_file()
+
 # ==================== Flask应用 ====================
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config['SECRET_KEY'] = Config.SECRET_KEY
 
 # 设置文件大小限制
 app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
@@ -441,6 +470,7 @@ HTML_TEMPLATE = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>龙解软控—文件加密解密系统</title>
+    <link rel="icon" href="/static/images/logo.png">
     <style>
         :root {
             --primary: #4361ee;
@@ -1415,6 +1445,7 @@ def index():
         <meta charset="UTF-8">
         
         <title>龙解软控 - 中国中学算法穹顶社</title>
+        <link rel="icon" href="/static/images/logo.png">
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
             body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh; }
@@ -1681,6 +1712,7 @@ def homework_mgr():
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>中国中学作业管理系统</title>
+        <link rel="icon" href="/static/images/logo.png">
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Microsoft YaHei', sans-serif; }
             body { background-color: #f5f7fa; color: #333; line-height: 1.6; }
@@ -1811,564 +1843,286 @@ def BingSiteAuth():
 
 @app.route('/sfqd-club')
 def sfqd_club():
-    return render_template_string('''
-    <!DOCTYPE html>
-    <html lang="zh-CN">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>龙解软控-中国中学算法穹顶社</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-            }
-
-            :root {
-                --primary: #1a73e8;
-                --primary-dark: #0d47a1;
-                --secondary: #00bcd4;
-                --dark: #0a192f;
-                --light: #f8f9fa;
-                --gray: #6c757d;
-            }
-
-            body {
-                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                color: var(--light);
-                line-height: 1.6;
-                overflow-x: hidden;
-                position: relative;
-            }
-
-            body::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: 
-                    radial-gradient(circle at 10% 20%, rgba(26, 115, 232, 0.1) 0%, transparent 20%),
-                    radial-gradient(circle at 90% 80%, rgba(0, 188, 212, 0.1) 0%, transparent 20%);
-                z-index: -1;
-            }
-
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 0 20px;
-            }
-
-            header {
-                padding: 30px 0;
-                position: relative;
-                z-index: 10;
-            }
-
-            .logo-container {
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }
-
-            .logo {
-                width: 70px;
-                height: 70px;
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 0 25px rgba(26, 115, 232, 0.5);
-            }
-
-            .logo i {
-                font-size: 32px;
-                color: white;
-            }
-
-            .logo-text {
-                font-size: 28px;
-                font-weight: 700;
-                background: linear-gradient(to right, var(--primary), var(--secondary));
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                letter-spacing: 1px;
-            }
-
-            .tagline {
-                font-size: 18px;
-                color: var(--secondary);
-                margin-top: 5px;
-                font-weight: 300;
-            }
-
-            .hero {
-                padding: 100px 0;
-                text-align: center;
-                position: relative;
-            }
-
-            .hero h1 {
-                font-size: 3.5rem;
-                margin-bottom: 20px;
-                background: linear-gradient(to right, #fff, var(--secondary));
-                -webkit-background-clip: text;
-                background-clip: text;
-                color: transparent;
-                font-weight: 800;
-                letter-spacing: 1px;
-            }
-
-            .hero p {
-                font-size: 1.5rem;
-                max-width: 800px;
-                margin: 0 auto 40px;
-                color: rgba(255, 255, 255, 0.9);
-                font-weight: 300;
-            }
-
-            .hero-highlight {
-                color: var(--secondary);
-                font-weight: 600;
-            }
-
-            .hero::after {
-                content: "";
-                position: absolute;
-                bottom: -60px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 80%;
-                height: 2px;
-                background: linear-gradient(to right, transparent, var(--primary), transparent);
-            }
-
-            .about {
-                padding: 100px 0;
-            }
-
-            .section-title {
-                text-align: center;
-                font-size: 2.5rem;
-                margin-bottom: 60px;
-                position: relative;
-            }
-
-            .section-title::after {
-                content: "";
-                position: absolute;
-                bottom: -15px;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 100px;
-                height: 4px;
-                background: linear-gradient(to right, var(--primary), var(--secondary));
-                border-radius: 2px;
-            }
-
-            .about-content {
-                display: flex;
-                gap: 50px;
-                align-items: center;
-            }
-
-            .about-text {
-                flex: 1;
-            }
-
-            .about-text h3 {
-                font-size: 1.8rem;
-                margin-bottom: 20px;
-                color: var(--secondary);
-            }
-
-            .about-text p {
-                margin-bottom: 20px;
-                font-size: 1.1rem;
-                color: rgba(255, 255, 255, 0.85);
-            }
-
-            .achievements {
-                padding: 100px 0;
-                background: rgba(10, 25, 47, 0.7);
-                position: relative;
-            }
-
-            .achievements-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 30px;
-                margin-top: 50px;
-            }
-
-            .achievement-card {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 15px;
-                padding: 30px;
-                transition: transform 0.3s, box-shadow 0.3s;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .achievement-card:hover {
-                transform: translateY(-10px);
-                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-                border-color: rgba(26, 115, 232, 0.3);
-            }
-
-            .achievement-icon {
-                font-size: 40px;
-                color: var(--secondary);
-                margin-bottom: 20px;
-            }
-
-            .achievement-title {
-                font-size: 1.5rem;
-                margin-bottom: 15px;
-                color: var(--secondary);
-            }
-
-            .achievement-list {
-                list-style-type: none;
-            }
-
-            .achievement-list li {
-                margin-bottom: 10px;
-                padding-left: 25px;
-                position: relative;
-            }
-
-            .achievement-list li::before {
-                content: "✓";
-                position: absolute;
-                left: 0;
-                color: var(--secondary);
-                font-weight: bold;
-            }
-
-            .projects {
-                padding: 100px 0;
-            }
-
-            .projects-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 30px;
-                margin-top: 50px;
-            }
-
-            .project-card {
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 15px;
-                overflow: hidden;
-                transition: transform 0.3s;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .project-card:hover {
-                transform: translateY(-10px);
-            }
-
-            .project-image {
-                height: 200px;
-                background: linear-gradient(135deg, rgba(26, 115, 232, 0.3), rgba(0, 188, 212, 0.3));
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .project-content {
-                padding: 25px;
-            }
-
-            .project-title {
-                font-size: 1.4rem;
-                margin-bottom: 15px;
-                color: var(--secondary);
-            }
-
-            .project-desc {
-                color: rgba(255, 255, 255, 0.8);
-            }
-
-            .cta-section {
-                padding: 100px 0;
-                text-align: center;
-            }
-
-            .cta-title {
-                font-size: 2.5rem;
-                margin-bottom: 20px;
-            }
-
-            .cta-subtitle {
-                font-size: 1.2rem;
-                max-width: 700px;
-                margin: 0 auto 50px;
-                color: rgba(255, 255, 255, 0.8);
-            }
-
-            .buttons-container {
-                display: flex;
-                justify-content: center;
-                gap: 30px;
-                flex-wrap: wrap;
-            }
-
-            .btn {
-                padding: 16px 40px;
-                border-radius: 50px;
-                font-size: 1.1rem;
-                font-weight: 600;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 10px;
-                min-width: 220px;
-                justify-content: center;
-            }
-
-            .btn-primary {
-                background: linear-gradient(to right, var(--primary), var(--primary-dark));
-                color: white;
-                box-shadow: 0 5px 20px rgba(26, 115, 232, 0.4);
-            }
-
-            .btn-primary:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px rgba(26, 115, 232, 0.6);
-            }
-
-            .btn-secondary {
-                background: rgba(255, 255, 255, 0.1);
-                color: white;
-                border: 2px solid var(--secondary);
-            }
-
-            .btn-secondary:hover {
-                background: rgba(0, 188, 212, 0.2);
-                transform: translateY(-5px);
-            }
-
-            .btn-tertiary {
-                background: linear-gradient(to right, #6a11cb, #2575fc);
-                color: white;
-                box-shadow: 0 5px 20px rgba(106, 17, 203, 0.4);
-            }
-
-            .btn-tertiary:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px rgba(106, 17, 203, 0.6);
-            }
-
-            footer {
-                padding: 40px 0;
-                text-align: center;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-            }
-
-            .footer-links {
-                display: flex;
-                justify-content: center;
-                gap: 30px;
-                margin-bottom: 30px;
-                flex-wrap: wrap;
-            }
-
-            .footer-link {
-                color: rgba(255, 255, 255, 0.7);
-                text-decoration: none;
-                transition: color 0.3s;
-            }
-
-            .footer-link:hover {
-                color: var(--secondary);
-            }
-
-            .icp {
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.5);
-            }
-
-            .icp a {
-                color: rgba(255, 255, 255, 0.7);
-                text-decoration: none;
-            }
-
-            .icp a:hover {
-                color: var(--secondary);
-                text-decoration: underline;
-            }
-
-            @media (max-width: 992px) {
-                .about-content {
-                    flex-direction: column;
-                }
-                
-                .hero h1 {
-                    font-size: 2.8rem;
-                }
-                
-                .hero p {
-                    font-size: 1.2rem;
-                }
-            }
-
-            @media (max-width: 768px) {
-                .hero {
-                    padding: 70px 0;
-                }
-                
-                .hero h1 {
-                    font-size: 2.3rem;
-                }
-                
-                .section-title {
-                    font-size: 2rem;
-                }
-                
-                .buttons-container {
-                    flex-direction: column;
-                    align-items: center;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <header>
-                <div class="logo-container">
-                    <div class="logo">
-                        <img src="/static/images/logo.png" alt="算法穹顶社" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                    </div>
-                    <div>
-                        <div class="logo-text">算法穹顶社</div>
-                        <div class="tagline">科技 · 创新 · 未来</div>
-                    </div>
-                </div>
-            </header>
-
-            <section class="hero">
-                <h1>龙解软控-中国中学算法穹顶社</h1>
-                <p>成立于<span class="hero-highlight">2025年9月</span>，是中国中学第一个科技类学生社团。我们旨在以<span class="hero-highlight">算法改变思维</span>，培养编程与工程人才，通过科技创新<span class="hero-highlight">解决现实问题</span>。</p>
-            </section>
-
-            <section class="about">
-                <h2 class="section-title">社团简介</h2>
-                <div class="about-content">
-                    <div class="about-text">
-                        <h3>科技引领未来，算法改变思维</h3>
-                        <p>中国中学算法穹顶社成立于2025年9月，是中国中学历史上第一个专注于科技领域的学生社团。我们致力于通过算法和编程教育，改变学生对问题的思考方式，培养创新思维和解决问题的能力。</p>
-                        <p>社团面向所有对编程、算法和工程项目感兴趣的同学开放，无论你是初学者还是有一定基础的技术爱好者，都能在这里找到成长的空间和展示的舞台。</p>
-                        <p>我们定期组织技术培训、项目开发和竞赛准备活动，帮助社员提升技术水平，参加市级和区级的各类科技竞赛，并在实际项目中应用所学知识解决校园和社会的现实问题。</p>
-                    </div>
-                </div>
-            </section>
-
-            <section class="achievements">
-                <h2 class="section-title">社团成就</h2>
-                <div class="achievements-grid">
-                    <div class="achievement-card">
-                        <div class="achievement-icon">
-                            <i class="fas fa-trophy"></i>
-                        </div>
-                        <h3 class="achievement-title">竞赛荣誉</h3>
-                        <ul class="achievement-list">
-                            <li>加拿大海狸计算机比赛（BCC）</li>
-                            <li>加拿大计算机比赛（CCC）</li>
-                            <li>第五届长三角人工智能奥林匹克挑战赛</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="achievement-card">
-                        <div class="achievement-icon">
-                            <i class="fas fa-laptop-code"></i>
-                        </div>
-                        <h3 class="achievement-title">在研项目</h3>
-                        <ul class="achievement-list">
-                            <li>中国中学课后体育场馆预约系统</li>
-                            <li>中国中学尔雅轩电影预约系统</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section class="projects">
-                <h2 class="section-title">特色项目</h2>
-                <div class="projects-grid">
-                    <div class="project-card">
-                        <div class="project-image">
-                            <i class="fas fa-calendar-check fa-3x"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">体育场馆预约系统</h3>
-                            <p class="project-desc">基于Web的智能预约平台，方便学生课后预约使用学校体育场馆，优化资源分配。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card">
-                        <div class="project-image">
-                            <i class="fas fa-film fa-3x"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">尔雅轩电影预约</h3>
-                            <p class="project-desc">校园影院预约系统，提升校园文化体验。</p>
-                        </div>
-                    </div>
-                    
-                    <div class="project-card">
-                        <div class="project-image">
-                            <i class="fas fa-robot fa-3x"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3 class="project-title">中国中学作业管理系统</h3>
-                            <p class="project-desc">数字化管理作业收发问题，方便高效。</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="cta-section">
-                <h2 class="cta-title">加入我们，共创未来</h2>
-                <p class="cta-subtitle">探索算法穹顶社的精彩活动，了解我们的课程安排，认识优秀的社团成员</p>
-                
-                <div class="buttons-container">
-                    <a href="/sfqd-club/plan" class="btn btn-primary">
-                        <i class="fas fa-calendar-alt"></i>
-                        社团初期安排
-                    </a>
-                    
-                    <a href="/sfqd-club/members" class="btn btn-secondary">
-                        <i class="fas fa-users"></i>
-                        社团成员
-                    </a>
-                    
-                    <a href="#" class="btn btn-tertiary">
-                        <i class="fas fa-book"></i>
-                        社团课程
-                    </a>
-                </div>
-            </section>
-        </div>
-
-        <footer>
-            <div class="container">
-                <div class="icp">
-                    <a href="http://beian.miit.gov.cn" target="_blank">沪ICP备2025145173号</a>
-                    <a href="http://www.beian.gov.cn" target="_blank">沪公网安备31010402335801号</a>
-                </div>
-            </div>
-        </footer>
-    </body>
-    </html>
-    ''')
+    """算法穹顶社官网"""
+    return render_template('club_index.html')
+
+
+@app.route('/club-assets')
+def club_assets_page():
+    """社团资产展示页"""
+    return render_template('club_assets.html')
+
+
+# ==================== 社团官网：加入我们 + 报名管理 ====================
+
+@app.route('/join')
+def club_join_page():
+    """加入我们报名表单页"""
+    return render_template('club_join.html')
+
+
+@app.route('/club-admin')
+def club_admin_page():
+    """报名管理后台页"""
+    return render_template('club_admin.html')
+
+
+@app.route('/api/join/status')
+def api_join_status():
+    """查询报名开放状态（公开）"""
+    try:
+        status = 'closed'
+        if os.path.exists(CLUB_JOIN_FILE):
+            try:
+                cfg = pd.read_excel(CLUB_JOIN_FILE, sheet_name='config')
+                if not cfg.empty:
+                    status = str(cfg.iloc[0].get('status', 'closed')).strip().lower()
+            except Exception:
+                pass
+        return jsonify({'status': status})
+    except Exception:
+        return jsonify({'status': 'closed'})
+
+
+@app.route('/api/join', methods=['POST'])
+def api_join_submit():
+    """提交报名（写入 xlsx）"""
+    try:
+        data = request.json or {}
+        class_name = (data.get('class') or '').strip()
+        name = (data.get('name') or '').strip()
+        contact = (data.get('contact') or '').strip()
+
+        valid_classes = [f'高一{i}班' for i in range(1, 9)] + [f'高二{i}班' for i in range(1, 9)]
+        if not class_name or class_name not in valid_classes:
+            return jsonify({'success': False, 'error': '请选择有效班级'}), 400
+        if not name or not contact:
+            return jsonify({'success': False, 'error': '姓名和联系方式不能为空'}), 400
+
+        # 检查报名是否开放
+        status = 'closed'
+        if os.path.exists(CLUB_JOIN_FILE):
+            try:
+                cfg = pd.read_excel(CLUB_JOIN_FILE, sheet_name='config')
+                if not cfg.empty:
+                    status = str(cfg.iloc[0].get('status', 'closed')).strip().lower()
+            except Exception:
+                pass
+        if status != 'open':
+            return jsonify({'success': False, 'error': '报名未开放'}), 403
+
+        # 追加写入
+        init_club_join_file()
+        new_row = pd.DataFrame([{
+            '提交时间': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            '班级': class_name,
+            '姓名': name,
+            '联系方式': contact
+        }])
+        try:
+            existing = pd.read_excel(CLUB_JOIN_FILE, sheet_name='submissions')
+            combined = pd.concat([existing, new_row], ignore_index=True)
+        except Exception:
+            combined = new_row
+        cfg_df = pd.DataFrame([{'status': status}])
+        with pd.ExcelWriter(CLUB_JOIN_FILE) as writer:
+            combined.to_excel(writer, sheet_name='submissions', index=False)
+            cfg_df.to_excel(writer, sheet_name='config', index=False)
+
+        app.logger.info(f"新报名: {class_name} {name} {contact}")
+        return jsonify({'success': True})
+    except Exception as e:
+        app.logger.error(f"报名提交失败: {e}")
+        return jsonify({'success': False, 'error': '提交失败，请稍后重试'}), 500
+
+
+def club_admin_required(f):
+    """管理后台登录装饰器"""
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('club_admin_logged_in'):
+            return jsonify({'error': '请先登录'}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route('/api/club/me')
+def api_club_me():
+    """查询管理员登录状态"""
+    if session.get('club_admin_logged_in'):
+        return jsonify({'logged_in': True, 'username': session.get('club_admin_username', '')})
+    return jsonify({'logged_in': False})
+
+
+@app.route('/api/club/login', methods=['POST'])
+def api_club_login():
+    """管理员登录 - 通过 xyz 服务器验证账号，仅 admin 身份可登录
+    （与预约系统管理员验证逻辑一致：POST xyz/login，校验 account_type/roles）
+    """
+    try:
+        data = request.json or {}
+        username = (data.get('username') or '').strip()
+        password = (data.get('password') or '').strip()
+        if not username or not password:
+            return jsonify({'error': '用户名和密码不能为空'}), 400
+
+        # 调用 xyz 服务器登录路由验证账号（urllib 标准库实现）
+        payload = json.dumps({'username': username, 'password': password}).encode('utf-8')
+        req = urllib.request.Request(
+            CLUB_LOGIN_SERVER_URL,
+            data=payload,
+            headers={'Content-Type': 'application/json'},
+            method='POST'
+        )
+        status_code = 0
+        body = ''
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                status_code = resp.status
+                body = resp.read().decode('utf-8')
+        except urllib.error.HTTPError as e:
+            status_code = e.code
+            body = e.read().decode('utf-8', errors='replace')
+        except urllib.error.URLError as e:
+            app.logger.error(f"连接登录服务器失败: {e}")
+            return jsonify({'error': '登录服务器连接失败'}), 503
+        except Exception as e:
+            app.logger.error(f"登录服务器异常: {e}")
+            return jsonify({'error': '登录服务器连接失败'}), 503
+
+        if status_code == 200:
+            try:
+                response_data = json.loads(body)
+            except Exception:
+                response_data = {}
+            account_type = response_data.get('account_type', '')
+            roles = response_data.get('roles', [])
+            if isinstance(roles, str):
+                roles = [r.strip() for r in roles.split(',')]
+            if not isinstance(roles, list):
+                roles = []
+            is_admin = account_type == 'admin' or (bool(roles) and 'admin' in [str(r).lower() for r in roles])
+            if is_admin:
+                session['club_admin_logged_in'] = True
+                session['club_admin_username'] = username
+                session['club_admin_login_time'] = datetime.now().isoformat()
+                app.logger.info(f"社团管理员登录成功: {username}")
+                return jsonify({'success': True, 'username': username, 'message': '登录成功'})
+            else:
+                app.logger.warning(f"社团管理员登录失败(身份不足): {username} account_type={account_type} roles={roles}")
+                return jsonify({'error': '只有管理员身份可以登录管理端'}), 403
+        else:
+            try:
+                err_data = json.loads(body)
+                err_msg = err_data.get('message', '用户名或密码错误')
+            except Exception:
+                err_msg = '用户名或密码错误'
+            return jsonify({'error': err_msg}), 401
+    except Exception as e:
+        app.logger.error(f"管理员登录接口异常: {e}")
+        return jsonify({'error': '登录接口异常'}), 500
+
+
+@app.route('/api/club/logout', methods=['POST'])
+def api_club_logout():
+    """退出登录"""
+    session.pop('club_admin_logged_in', None)
+    session.pop('club_admin_username', None)
+    session.pop('club_admin_login_time', None)
+    return jsonify({'success': True})
+
+
+@app.route('/api/club/toggle', methods=['POST'])
+@club_admin_required
+def api_club_toggle():
+    """切换报名开放/关闭状态"""
+    try:
+        init_club_join_file()
+        current = 'closed'
+        try:
+            cfg = pd.read_excel(CLUB_JOIN_FILE, sheet_name='config')
+            if not cfg.empty:
+                current = str(cfg.iloc[0].get('status', 'closed')).strip().lower()
+        except Exception:
+            pass
+        new_status = 'open' if current != 'open' else 'closed'
+        try:
+            subs = pd.read_excel(CLUB_JOIN_FILE, sheet_name='submissions')
+        except Exception:
+            subs = pd.DataFrame(columns=['提交时间', '班级', '姓名', '联系方式'])
+        cfg_df = pd.DataFrame([{'status': new_status}])
+        with pd.ExcelWriter(CLUB_JOIN_FILE) as writer:
+            subs.to_excel(writer, sheet_name='submissions', index=False)
+            cfg_df.to_excel(writer, sheet_name='config', index=False)
+        app.logger.info(f"报名状态切换为: {new_status}")
+        return jsonify({'success': True, 'status': new_status})
+    except Exception as e:
+        app.logger.error(f"切换报名状态失败: {e}")
+        return jsonify({'error': '切换失败'}), 500
+
+
+@app.route('/api/club/list')
+@club_admin_required
+def api_club_list():
+    """获取报名列表 + 状态 + 统计"""
+    try:
+        init_club_join_file()
+        status = 'closed'
+        try:
+            cfg = pd.read_excel(CLUB_JOIN_FILE, sheet_name='config')
+            if not cfg.empty:
+                status = str(cfg.iloc[0].get('status', 'closed')).strip().lower()
+        except Exception:
+            pass
+        try:
+            subs = pd.read_excel(CLUB_JOIN_FILE, sheet_name='submissions')
+        except Exception:
+            subs = pd.DataFrame(columns=['提交时间', '班级', '姓名', '联系方式'])
+
+        records = []
+        for _, row in subs.iterrows():
+            records.append({
+                '提交时间': str(row.get('提交时间', '')),
+                '班级': str(row.get('班级', '')),
+                '姓名': str(row.get('姓名', '')),
+                '联系方式': str(row.get('联系方式', ''))
+            })
+        records.reverse()
+
+        by_class = {}
+        for r in records:
+            c = r['班级']
+            if c:
+                by_class[c] = by_class.get(c, 0) + 1
+
+        return jsonify({
+            'status': status,
+            'total': len(records),
+            'by_class': by_class,
+            'submissions': records
+        })
+    except Exception as e:
+        app.logger.error(f"获取报名列表失败: {e}")
+        return jsonify({'error': '获取失败'}), 500
+
+
+@app.route('/api/club/export')
+@club_admin_required
+def api_club_export():
+    """导出报名数据 xlsx"""
+    try:
+        init_club_join_file()
+        if not os.path.exists(CLUB_JOIN_FILE):
+            return jsonify({'error': '暂无数据'}), 404
+        return send_file(
+            CLUB_JOIN_FILE,
+            as_attachment=True,
+            download_name='join_data.xlsx'
+        )
+    except Exception as e:
+        app.logger.error(f"导出报名数据失败: {e}")
+        return jsonify({'error': '导出失败'}), 500
 
 
 @app.errorhandler(413)

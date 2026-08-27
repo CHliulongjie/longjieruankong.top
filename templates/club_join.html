@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加入我们 · 算法穹顶社</title>
+    <link rel="icon" href="/static/images/logo.png">
+    <style>
+        :root {
+            --bg: #05070f;
+            --bg-soft: #0a0f1e;
+            --card: #0d1426;
+            --card-border: rgba(96,165,250,.16);
+            --text: #e7edf8;
+            --text-dim: #9aa7bf;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --grad: linear-gradient(120deg,#22d3ee 0%,#3b82f6 45%,#8b5cf6 100%);
+            --radius: 16px;
+            --nav-h: 72px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            line-height:1.7;
+            overflow-x:hidden;
+            min-height:100vh;
+        }
+        img{display:block;max-width:100%}
+        a{color:inherit;text-decoration:none}
+        .container{width:min(1180px,92%);margin:0 auto}
+        /* SECTION: nav */
+        .site-header{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            height:var(--nav-h);
+            background:rgba(5,7,15,.82);
+            backdrop-filter:blur(14px);
+            border-bottom:1px solid rgba(96,165,250,.14);
+            box-shadow:0 8px 32px rgba(0,0,0,.35);
+        }
+        .nav-inner{height:var(--nav-h);display:flex;align-items:center;justify-content:space-between}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-logo{width:44px;height:44px;flex:none;object-fit:cover;border-radius:10px;filter:drop-shadow(0 0 10px rgba(34,211,238,.45))}
+        .brand-name{font-size:19px;font-weight:800;letter-spacing:.08em}
+        .nav-links{display:flex;align-items:center;gap:6px}
+        .nav-links a{
+            padding:9px 18px;border-radius:10px;font-size:15px;color:var(--text-dim);
+            transition:color .25s,background .25s;position:relative;
+        }
+        .nav-links a:hover{color:var(--text)}
+        .nav-links a.active{color:var(--cyan);background:rgba(34,211,238,.08)}
+        .nav-cta{
+            margin-left:12px;padding:9px 22px !important;border-radius:999px;
+            background:var(--grad);color:#fff !important;font-weight:700;
+            box-shadow:0 4px 18px rgba(59,130,246,.4);
+        }
+        .nav-toggle{display:none;background:none;border:0;width:44px;height:44px;cursor:pointer;position:relative;z-index:110}
+        .nav-toggle span{display:block;width:22px;height:2px;background:var(--text);margin:5px auto;border-radius:2px;transition:transform .3s,opacity .3s}
+        .nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-toggle.open span:nth-child(2){opacity:0}
+        .nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        /* SECTION: hero small */
+        .join-hero{
+            padding:calc(var(--nav-h) + 80px) 0 40px;
+            text-align:center;
+            position:relative;
+            overflow:hidden;
+        }
+        .join-hero::before{
+            content:"";position:absolute;inset:0;
+            background-image:linear-gradient(rgba(59,130,246,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.06) 1px,transparent 1px);
+            background-size:56px 56px;
+            mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 75%);
+            -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,#000 30%,transparent 75%);
+            z-index:0;
+        }
+        .join-hero-glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.32;pointer-events:none}
+        .join-hero-glow.g1{width:380px;height:380px;background:#0e7490;top:-120px;left:-80px}
+        .join-hero-glow.g2{width:340px;height:340px;background:#5b21b6;bottom:-100px;right:-80px}
+        .join-hero-content{position:relative;z-index:2}
+        .section-tag{
+            display:inline-flex;align-items:center;gap:8px;
+            font-size:13px;letter-spacing:.35em;color:var(--cyan);
+            text-transform:uppercase;margin-bottom:14px;
+        }
+        .section-tag::before,.section-tag::after{
+            content:"";width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan));
+        }
+        .section-tag::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+        .join-hero h1{
+            font-size:clamp(34px,5vw,56px);font-weight:900;letter-spacing:.06em;line-height:1.18;
+            margin-bottom:14px;
+        }
+        .join-hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .join-hero p{color:var(--text-dim);font-size:16px;letter-spacing:.06em;max-width:640px;margin:0 auto}
+        /* SECTION: form card */
+        .form-section{padding:30px 0 80px}
+        .form-card{
+            max-width:560px;margin:0 auto;
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:var(--radius);
+            padding:40px 36px;
+            box-shadow:0 12px 40px rgba(0,0,0,.4);
+        }
+        .form-group{margin-bottom:24px}
+        .form-group label{
+            display:block;font-size:14px;font-weight:600;color:var(--text);
+            margin-bottom:10px;letter-spacing:.04em;
+        }
+        .form-group label .required{color:var(--cyan);margin-left:4px}
+        .form-control{
+            width:100%;padding:12px 16px;
+            background:rgba(5,7,15,.6);
+            border:1px solid rgba(96,165,250,.2);
+            border-radius:10px;
+            color:var(--text);font-size:15px;
+            font-family:inherit;
+            transition:border-color .25s,box-shadow .25s,background .25s;
+            outline:none;
+        }
+        .form-control::placeholder{color:rgba(154,167,191,.5)}
+        .form-control:focus{
+            border-color:var(--cyan);
+            box-shadow:0 0 0 3px rgba(34,211,238,.15);
+            background:rgba(5,7,15,.85);
+        }
+        .form-control:disabled{opacity:.5;cursor:not-allowed}
+        select.form-control{
+            appearance:none;
+            background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aa7bf' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat:no-repeat;
+            background-position:right 14px center;
+            padding-right:40px;
+        }
+        select.form-control option{background:#0d1426;color:var(--text)}
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:8px;
+            padding:14px 34px;border-radius:999px;
+            font-size:16px;font-weight:700;letter-spacing:.06em;cursor:pointer;border:0;
+            transition:transform .25s,box-shadow .25s,background .25s,opacity .25s;
+            width:100%;
+        }
+        .btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 28px rgba(59,130,246,.45)}
+        .btn-primary:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(34,211,238,.5)}
+        .btn-primary:disabled{
+            opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;
+            background:rgba(96,165,250,.2);color:var(--text-dim);
+        }
+        /* SECTION: alert */
+        .alert{
+            padding:14px 18px;border-radius:10px;margin-bottom:20px;
+            font-size:14px;display:none;align-items:center;gap:10px;
+        }
+        .alert.show{display:flex}
+        .alert.success{background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.35);color:var(--cyan)}
+        .alert.error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.35);color:#fca5a5}
+        .alert.warning{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35);color:#fcd34d}
+        /* SECTION: closed banner */
+        .closed-banner{
+            display:none;
+            text-align:center;padding:40px 20px;
+            background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);
+            border-radius:var(--radius);color:#fca5a5;
+        }
+        .closed-banner.show{display:block}
+        .closed-banner h3{font-size:20px;font-weight:700;margin-bottom:10px;color:#fca5a5}
+        .closed-banner p{font-size:14px;color:var(--text-dim)}
+        /* SECTION: footer */
+        .site-footer{
+            padding:40px 0;border-top:1px solid rgba(148,163,184,.1);
+            text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.06em;
+        }
+        .site-footer a{color:var(--cyan)}
+        /* responsive */
+        @media(max-width:640px){
+            .nav-links{
+                position:fixed;top:0;right:-100%;width:72vw;max-width:320px;height:100vh;
+                background:rgba(10,15,30,.97);backdrop-filter:blur(20px);
+                flex-direction:column;padding:100px 32px 40px;gap:8px;
+                transition:right .35s;border-left:1px solid var(--card-border);
+            }
+            .nav-links.open{right:0}
+            .nav-toggle{display:block}
+            .form-card{padding:28px 20px}
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HEADER / NAV ====== -->
+    <header class="site-header" id="siteHeader">
+        <div class="container nav-inner">
+            <a href="/sfqd-club" class="brand">
+                <img class="brand-logo" src="/static/club/logo.png" alt="算法穹顶社图标">
+                <div class="brand-name">算法穹顶社</div>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="/sfqd-club">首页</a>
+                <a href="/sfqd-club#brief">社团介绍</a>
+                <a href="/sfqd-club#intro">社团项目</a>
+                <a href="/sfqd-club#achievements">社团成就</a>
+                <a href="/join" class="nav-cta">加入我们</a>
+            </nav>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== JOIN HERO ====== -->
+    <section class="join-hero">
+        <div class="join-hero-glow g1"></div>
+        <div class="join-hero-glow g2"></div>
+        <div class="join-hero-content container">
+            <div class="section-tag">JOIN US</div>
+            <h1>加入<span class="grad">算法穹顶社</span></h1>
+            <p>填写下方报名表，开启你的科技探索之旅。我们期待与热爱代码的你相遇。</p>
+        </div>
+    </section>
+
+    <!-- ====== FORM ====== -->
+    <section class="form-section">
+        <div class="container">
+            <div class="form-card" id="formCard">
+                <!-- 报名未开放提示 -->
+                <div class="closed-banner" id="closedBanner">
+                    <h3>报名暂未开放</h3>
+                    <p>管理员尚未开放报名通道，请稍后再来或联系社团负责人。</p>
+                </div>
+
+                <!-- 提示信息 -->
+                <div class="alert" id="alertBox"></div>
+
+                <form id="joinForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="classInput">选择班级<span class="required">*</span></label>
+                        <select class="form-control" id="classInput" name="class" required disabled>
+                            <option value="">请选择你的班级</option>
+                            <optgroup label="高一">
+                                <option value="高一1班">高一1班</option>
+                                <option value="高一2班">高一2班</option>
+                                <option value="高一3班">高一3班</option>
+                                <option value="高一4班">高一4班</option>
+                                <option value="高一5班">高一5班</option>
+                                <option value="高一6班">高一6班</option>
+                                <option value="高一7班">高一7班</option>
+                                <option value="高一8班">高一8班</option>
+                            </optgroup>
+                            <optgroup label="高二">
+                                <option value="高二1班">高二1班</option>
+                                <option value="高二2班">高二2班</option>
+                                <option value="高二3班">高二3班</option>
+                                <option value="高二4班">高二4班</option>
+                                <option value="高二5班">高二5班</option>
+                                <option value="高二6班">高二6班</option>
+                                <option value="高二7班">高二7班</option>
+                                <option value="高二8班">高二8班</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nameInput">姓名<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="nameInput" name="name"
+                               placeholder="请输入你的真实姓名" maxlength="30" required disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactInput">联系方式<span class="required">*</span></label>
+                        <input type="text" class="form-control" id="contactInput" name="contact"
+                               placeholder="手机号 / 微信号 / QQ号 均可" maxlength="50" required disabled>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn" disabled>提交报名</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 算法穹顶社 · 用热爱点亮每一行代码</p>
+        </div>
+    </footer>
+
+    <script>
+    (function(){
+        /* ---- Mobile nav toggle ---- */
+        const toggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
+
+        /* ---- Alert helper ---- */
+        const alertBox = document.getElementById('alertBox');
+        function showAlert(type, msg){
+            alertBox.className = 'alert ' + type + ' show';
+            alertBox.textContent = msg;
+        }
+        function hideAlert(){
+            alertBox.className = 'alert';
+            alertBox.textContent = '';
+        }
+
+        /* ---- Elements ---- */
+        const formCard = document.getElementById('formCard');
+        const closedBanner = document.getElementById('closedBanner');
+        const joinForm = document.getElementById('joinForm');
+        const classInput = document.getElementById('classInput');
+        const nameInput = document.getElementById('nameInput');
+        const contactInput = document.getElementById('contactInput');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function enableForm(){
+            [classInput, nameInput, contactInput].forEach(el => el.disabled = false);
+            submitBtn.disabled = false;
+        }
+
+        /* ---- Check join status on load ---- */
+        fetch('/api/join/status')
+            .then(r => r.json())
+            .then(data => {
+                if(data.status === 'open'){
+                    enableForm();
+                } else {
+                    closedBanner.classList.add('show');
+                    joinForm.style.display = 'none';
+                }
+            })
+            .catch(() => {
+                // 查询失败，默认禁用表单
+                closedBanner.querySelector('h3').textContent = '无法确认报名状态';
+                closedBanner.querySelector('p').textContent = '服务器暂时无法响应，请稍后再试。';
+                closedBanner.classList.add('show');
+                joinForm.style.display = 'none';
+            });
+
+        /* ---- Submit form ---- */
+        joinForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const payload = {
+                class: classInput.value.trim(),
+                name: nameInput.value.trim(),
+                contact: contactInput.value.trim()
+            };
+
+            if(!payload.class || !payload.name || !payload.contact){
+                showAlert('error', '请完整填写班级、姓名和联系方式');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+
+            try {
+                const response = await fetch('/api/join', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+
+                if(data.success){
+                    showAlert('success', '报名提交成功！我们会尽快与你联系。');
+                    joinForm.reset();
+                } else {
+                    showAlert('error', data.error || '提交失败，请稍后重试');
+                }
+            } catch(err){
+                showAlert('error', '网络错误：' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交报名';
+            }
+        });
+    })();
+    </script>
+</body>
+</html>

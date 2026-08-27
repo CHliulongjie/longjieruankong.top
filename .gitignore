@@ -44,3 +44,5 @@ Thumbs.db
 *.tmp
 *.bak
 temp/
+# 社团报名运行时数据
+join_data.xlsx

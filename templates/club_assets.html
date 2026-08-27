@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社团资产 · 算法穹顶社</title>
+    <meta name="description" content="算法穹顶社开源项目与数字资产展示">
+    <link rel="icon" href="/static/images/logo.png">
+    <style>
+        /* SECTION: base */
+        :root {
+            --bg: #05070f;
+            --bg-soft: #0a0f1e;
+            --card: #0d1426;
+            --card-border: rgba(96,165,250,.16);
+            --text: #e7edf8;
+            --text-dim: #9aa7bf;
+            --cyan: #22d3ee;
+            --blue: #3b82f6;
+            --violet: #8b5cf6;
+            --grad: linear-gradient(120deg,#22d3ee 0%,#3b82f6 45%,#8b5cf6 100%);
+            --radius: 16px;
+            --nav-h: 72px;
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            line-height:1.7;
+            overflow-x:hidden;
+        }
+        img{display:block;max-width:100%}
+        a{color:inherit;text-decoration:none}
+        .container{width:min(1180px,92%);margin:0 auto}
+        .section{padding:96px 0;position:relative}
+        .section-head{text-align:center;margin-bottom:56px}
+        .section-tag{
+            display:inline-flex;align-items:center;gap:8px;
+            font-size:13px;letter-spacing:.35em;color:var(--cyan);
+            text-transform:uppercase;margin-bottom:14px;
+        }
+        .section-tag::before,.section-tag::after{
+            content:"";width:32px;height:1px;background:linear-gradient(90deg,transparent,var(--cyan));
+        }
+        .section-tag::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+        .section-title{font-size:clamp(26px,3.4vw,38px);font-weight:800;letter-spacing:.04em}
+        .section-title .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .section-sub{color:var(--text-dim);margin-top:12px;font-size:15px}
+        /* SECTION: nav */
+        .site-header{
+            position:fixed;top:0;left:0;right:0;z-index:100;
+            height:var(--nav-h);
+            background:rgba(5,7,15,.82);
+            backdrop-filter:blur(14px);
+            border-bottom:1px solid rgba(96,165,250,.14);
+            box-shadow:0 8px 32px rgba(0,0,0,.35);
+        }
+        .nav-inner{height:var(--nav-h);display:flex;align-items:center;justify-content:space-between}
+        .brand{display:flex;align-items:center;gap:12px}
+        .brand-logo{width:44px;height:44px;flex:none;object-fit:cover;border-radius:10px;filter:drop-shadow(0 0 10px rgba(34,211,238,.45))}
+        .brand-name{font-size:19px;font-weight:800;letter-spacing:.08em}
+        .nav-links{display:flex;align-items:center;gap:6px}
+        .nav-links a{
+            padding:9px 18px;border-radius:10px;font-size:15px;color:var(--text-dim);
+            transition:color .25s,background .25s;
+        }
+        .nav-links a:hover{color:var(--text)}
+        .nav-links a.active{color:var(--cyan);background:rgba(34,211,238,.08)}
+        .nav-cta{
+            margin-left:12px;padding:9px 22px !important;border-radius:999px;
+            background:var(--grad);color:#fff !important;font-weight:700;
+            box-shadow:0 4px 18px rgba(59,130,246,.4);
+        }
+        .nav-toggle{display:none;background:none;border:0;width:44px;height:44px;cursor:pointer;position:relative;z-index:110}
+        .nav-toggle span{display:block;width:22px;height:2px;background:var(--text);margin:5px auto;border-radius:2px;transition:transform .3s,opacity .3s}
+        .nav-toggle.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+        .nav-toggle.open span:nth-child(2){opacity:0}
+        .nav-toggle.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+        /* SECTION: page banner */
+        .page-banner{
+            padding:calc(var(--nav-h) + 90px) 0 50px;
+            text-align:center;
+            background:var(--bg-soft);
+            border-bottom:1px solid var(--card-border);
+            position:relative;
+            overflow:hidden;
+        }
+        .page-banner .glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.28;pointer-events:none}
+        .page-banner .glow.g1{width:420px;height:420px;background:#0e7490;top:-140px;left:-100px}
+        .page-banner .glow.g2{width:380px;height:380px;background:#5b21b6;bottom:-120px;right:-90px}
+        .page-banner .container{position:relative;z-index:2}
+        .page-banner h1{font-size:clamp(34px,5.4vw,56px);font-weight:900;letter-spacing:.06em}
+        .page-banner h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .page-banner p{color:var(--text-dim);margin-top:14px;font-size:16px;letter-spacing:.06em}
+        /* SECTION: assets grid */
+        .assets-grid{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:24px;
+        }
+        .asset-card{
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:var(--radius);
+            padding:30px;
+            display:flex;
+            flex-direction:column;
+            transition:transform .25s,box-shadow .25s,border-color .25s;
+        }
+        .asset-card:hover{
+            transform:translateY(-4px);
+            box-shadow:0 12px 28px rgba(0,0,0,.35);
+            border-color:var(--cyan);
+        }
+        .asset-icon{
+            width:44px;height:44px;margin-bottom:18px;color:var(--cyan);
+            filter:drop-shadow(0 0 8px rgba(34,211,238,.4));
+        }
+        .asset-card h3{
+            font-size:20px;font-weight:800;margin-bottom:12px;color:var(--text);letter-spacing:.02em;
+        }
+        .asset-card .desc{
+            color:var(--text-dim);font-size:15px;flex:1;margin-bottom:22px;
+        }
+        .asset-link{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:10px 22px;border-radius:999px;
+            background:rgba(34,211,238,.08);color:var(--cyan);
+            font-size:14px;font-weight:700;align-self:flex-start;
+            border:1px solid rgba(34,211,238,.3);
+            transition:background .25s,transform .25s;
+        }
+        .asset-link:hover{background:rgba(34,211,238,.16);transform:translateY(-2px)}
+        .asset-link svg{width:16px;height:16px}
+        .asset-link.disabled{opacity:.5;cursor:not-allowed}
+        .asset-meta{
+            font-size:12px;color:var(--text-dim);opacity:.55;margin-top:14px;
+            word-break:break-all;
+        }
+        /* SECTION: footer */
+        .site-footer{
+            padding:40px 0;border-top:1px solid rgba(148,163,184,.1);
+            text-align:center;color:var(--text-dim);font-size:13px;letter-spacing:.06em;
+        }
+        .site-footer a{color:var(--cyan)}
+        /* SECTION: responsive */
+        @media(max-width:640px){
+            .assets-grid{grid-template-columns:1fr}
+            .nav-links{
+                position:fixed;top:0;right:-100%;width:72vw;max-width:320px;height:100vh;
+                background:rgba(10,15,30,.97);backdrop-filter:blur(20px);
+                flex-direction:column;padding:100px 32px 40px;gap:8px;
+                transition:right .35s;border-left:1px solid var(--card-border);
+            }
+            .nav-links.open{right:0}
+            .nav-toggle{display:block}
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== HEADER / NAV ====== -->
+    <header class="site-header">
+        <div class="container nav-inner">
+            <a href="/sfqd-club" class="brand">
+                <img class="brand-logo" src="/static/club/logo.png" alt="算法穹顶社图标">
+                <div class="brand-name">算法穹顶社</div>
+            </a>
+            <nav class="nav-links" id="navLinks">
+                <a href="/sfqd-club#hero">首页</a>
+                <a href="/sfqd-club#brief">社团介绍</a>
+                <a href="/sfqd-club#intro">社团项目</a>
+                <a href="/sfqd-club#achievements">社团成就</a>
+                <a href="/club-assets" class="active">社团资产</a>
+                <a href="/join" class="nav-cta">加入我们</a>
+            </nav>
+            <button class="nav-toggle" id="navToggle" aria-label="菜单">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ====== PAGE BANNER ====== -->
+    <section class="page-banner">
+        <div class="glow g1"></div>
+        <div class="glow g2"></div>
+        <div class="container">
+            <div class="section-tag">CLUB ASSETS</div>
+            <h1><span class="grad">社团资产</span></h1>
+            <p>开源项目与数字资产 · 用代码沉淀每一份成果</p>
+        </div>
+    </section>
+
+    <!-- ====== ASSETS GRID ====== -->
+    <section class="section">
+        <div class="container">
+            <div class="assets-grid" id="assetsGrid">
+                <!-- JS 动态渲染项目卡片 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ====== FOOTER ====== -->
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2026 算法穹顶社 · 用热爱点亮每一行代码</p>
+            <p style="margin-top:8px;font-size:12px;opacity:.6;"><a href="/club-admin">管理入口</a></p>
+        </div>
+    </footer>
+
+    <!-- ====== JAVASCRIPT ====== -->
+    <script>
+    (function(){
+        /* ---- 社团资产数据：4 个项目仓库 ---- */
+        const assets = [
+            { name: "XYZ 账号服务器", desc: "统一身份认证与登录权限中心，为社团各系统提供账号登录与管理服务。", url: "https://github.com/CHliulongjie/longjieruankong.xyz" },
+            { name: "TOP 官网服务器", desc: "算法穹顶社官方网站与门户站点，承载社团展示、加入报名与报名管理后台。", url: "https://github.com/CHliulongjie/longjieruankong.top" },
+            { name: "场馆预约系统", desc: "中国中学场馆在线预约管理平台，支持多场地多时段预约与数据管理。", url: "https://github.com/CHliulongjie/zgzxReservationsys" },
+            { name: "作业管理系统", desc: "作业发布、提交与管理一体化系统，服务日常教学作业流转。", url: "https://github.com/CHliulongjie/zgzxHomeworkmgr" }
+        ];
+        const githubIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2 1-.3 2-.4 3-.4s2 .1 3 .4c2.3-1.5 3.3-1.2 3.3-1.2.7 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>';
+        const grid = document.getElementById('assetsGrid');
+        assets.forEach(a => {
+            const card = document.createElement('div');
+            card.className = 'asset-card';
+            const hasUrl = a.url && a.url.length > 0;
+            const linkHtml = hasUrl
+                ? `<a class="asset-link" href="${a.url}" target="_blank" rel="noopener">${githubIcon}查看项目</a>`
+                : `<span class="asset-link disabled">${githubIcon}链接待填入</span>`;
+            card.innerHTML = `
+                <svg class="asset-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <h3>${a.name}</h3>
+                <p class="desc">${a.desc}</p>
+                ${linkHtml}
+                ${hasUrl ? `<div class="asset-meta">${a.url}</div>` : ''}
+            `;
+            grid.appendChild(card);
+        });
+        /* ---- Mobile nav toggle ---- */
+        const toggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            toggle.classList.toggle('open');
+            navLinks.classList.toggle('open');
+        });
+        navLinks.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', () => {
+                toggle.classList.remove('open');
+                navLinks.classList.remove('open');
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
