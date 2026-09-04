@@ -89,19 +89,57 @@
             visibility:visible;
             transform: translateY(0);
         }
-        /* ========== 左侧悬浮循环视频 ========== */
+        /* ========== 项目展示卡（替代视频，纯CSS动画，零加载） ========== */
         .side-video-wrap {
-            width: 200%;
+            width: 100%;
             max-width: 720px;
             margin: 0 auto;
             border-radius: 16px;
             overflow: hidden;
-            background: #000;
+            position: relative;
+            height: 260px;
+            background: linear-gradient(135deg, rgba(13,20,38,.9), rgba(5,7,15,.95));
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .side-video-wrap video {
-            width: 100%;
-            display: block;
-            object-fit: cover;
+        .side-video-wrap::before {
+            content:"";
+            position:absolute;inset:0;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(34,211,238,.18), transparent 40%),
+                radial-gradient(circle at 70% 70%, rgba(139,92,246,.18), transparent 40%);
+            animation: floatGlow 8s ease-in-out infinite alternate;
+        }
+        @keyframes floatGlow {
+            0%{transform:scale(1) translate(0,0)}
+            100%{transform:scale(1.15) translate(10px,-10px)}
+        }
+        .side-video-wrap .preview-label {
+            position: relative;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: .1em;
+            background: var(--grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            z-index: 2;
+        }
+        .side-video-wrap .preview-icon {
+            position:absolute;
+            width:54px;height:54px;
+            border-radius:50%;
+            border:2px solid rgba(34,211,238,.4);
+            display:flex;align-items:center;justify-content:center;
+            color:var(--cyan);
+            z-index:2;
+            animation: pulseRing 2.4s ease-out infinite;
+        }
+        @keyframes pulseRing {
+            0%{transform:scale(.9);opacity:.8}
+            100%{transform:scale(1.6);opacity:0}
         }
         /* SECTION: nav */
         .site-header{
@@ -448,9 +486,12 @@
             <div class="intro-card" style="margin:24px auto;">
                 <p>化学探索｜交互式化学科普网站。基于 Flask 搭建，包含完整 118 号元素交互周期表、化学反应原理科普，炫酷星空动画 UI。点击元素查看原子参数、电子排布、趣味科普；讲解活化、过渡、有效碰撞、成键等反应基础知识。响应式适配移动端，数据与页面分离，方便拓展更多化学学习内容。</p>
             </div>
-            <!-- 第二个视频 -->
+            <!-- 项目展示卡：场馆预约系统 -->
             <div class="side-video-wrap">
-                <video src="/static/club/intro2.mp4" autoplay loop muted playsinline></video>
+                <div class="preview-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                </div>
+                <div class="preview-label">场馆预约系统 · 项目预览</div>
             </div>
 
             <!-- 第二个视频下方新增文字卡片 -->

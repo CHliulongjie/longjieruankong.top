@@ -1853,6 +1853,14 @@ def club_assets_page():
     return render_template('club_assets.html')
 
 
+@app.route('/teacher')
+def teacher_day_page():
+    """教师节祝福页，URL 参数 ?name=李老师 或 ?site=李老师"""
+    # 兼容 name / site 两个参数名，默认"老师"
+    teacher_name = request.args.get('name', '').strip() or request.args.get('site', '').strip() or '老师'
+    return render_template('teacher_day.html', teacher_name=teacher_name)
+
+
 # ==================== 社团官网：加入我们 + 报名管理 ====================
 
 @app.route('/join')

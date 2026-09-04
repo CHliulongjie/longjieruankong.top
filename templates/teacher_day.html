@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ teacher_name }} · 教师节快乐</title>
+    <link rel="icon" href="/static/club/logo.png">
+    <style>
+        :root{
+            --bg:#0a0810;
+            --bg-soft:#120d1a;
+            --card:#1a1220;
+            --card-border:rgba(251,191,36,.22);
+            --text:#f5ede0;
+            --text-dim:#c9b8a0;
+            --gold:#fbbf24;
+            --gold-deep:#f59e0b;
+            --cyan:#22d3ee;
+            --blue:#3b82f6;
+            --violet:#8b5cf6;
+            --grad:linear-gradient(120deg,#fbbf24 0%,#f59e0b 35%,#8b5cf6 70%,#22d3ee 100%);
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+            line-height:1.7;
+            overflow-x:hidden;
+            min-height:100vh;
+            position:relative;
+        }
+        /* 背景光晕 */
+        body::before,body::after{
+            content:"";position:fixed;border-radius:50%;filter:blur(100px);opacity:.25;pointer-events:none;z-index:0;
+        }
+        body::before{width:500px;height:500px;background:var(--gold);top:-150px;left:-120px}
+        body::after{width:460px;height:460px;background:var(--violet);bottom:-140px;right:-100px}
+        .container{width:min(1100px,92%);margin:0 auto;position:relative;z-index:2}
+
+        /* ===== HEADER ===== */
+        .site-header{
+            position:relative;z-index:10;height:68px;
+            display:flex;align-items:center;justify-content:space-between;
+            padding:0 4%;
+            border-bottom:1px solid rgba(251,191,36,.12);
+            background:rgba(10,8,16,.6);backdrop-filter:blur(10px);
+        }
+        .brand{display:flex;align-items:center;gap:10px}
+        .brand img{width:38px;height:38px;border-radius:9px;filter:drop-shadow(0 0 8px rgba(251,191,36,.4))}
+        .brand-name{font-size:16px;font-weight:800;letter-spacing:.06em;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .back-link{font-size:14px;color:var(--text-dim);transition:color .25s}
+        .back-link:hover{color:var(--gold)}
+
+        /* ===== HERO ===== */
+        .hero{
+            text-align:center;
+            padding:70px 0 40px;
+            position:relative;
+        }
+        .hero .badge{
+            display:inline-flex;align-items:center;gap:8px;
+            padding:6px 18px;border-radius:999px;
+            background:rgba(251,191,36,.12);border:1px solid var(--card-border);
+            color:var(--gold);font-size:13px;letter-spacing:.3em;text-transform:uppercase;margin-bottom:24px;
+        }
+        .hero h1{
+            font-size:clamp(38px,7vw,72px);
+            font-weight:900;letter-spacing:.04em;line-height:1.2;
+        }
+        .hero h1 .name{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .hero h1 .small{display:block;font-size:.55em;margin-top:8px}
+        .hero .date{color:var(--text-dim);margin-top:18px;font-size:15px;letter-spacing:.1em}
+        .hero .date .dot{color:var(--gold);margin:0 10px}
+
+        /* ===== 烟花（纯CSS） ===== */
+        .fireworks{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+        .fw{position:absolute;width:6px;height:6px;border-radius:50%;animation:fwBurst 3s ease-out infinite}
+        .fw::before,.fw::after{
+            content:"";position:absolute;top:0;left:0;width:6px;height:6px;border-radius:50%;
+        }
+        .fw1{top:15%;left:18%;background:var(--gold);animation-delay:0s}
+        .fw2{top:25%;right:22%;background:var(--cyan);animation-delay:.6s}
+        .fw3{top:8%;left:50%;background:var(--violet);animation-delay:1.2s}
+        .fw4{top:30%;left:38%;background:#f87171;animation-delay:1.8s}
+        .fw5{top:12%;right:42%;background:var(--gold-deep);animation-delay:2.4s}
+        @keyframes fwBurst{
+            0%{transform:scale(1);opacity:1;box-shadow:0 0 8px currentColor}
+            100%{transform:scale(40);opacity:0;box-shadow:0 0 40px currentColor}
+        }
+
+        /* ===== 滚动祝福条 ===== */
+        .bless-marquee{
+            margin:40px 0;
+            background:linear-gradient(90deg,rgba(251,191,36,.08),rgba(139,92,246,.08));
+            border-top:1px solid var(--card-border);
+            border-bottom:1px solid var(--card-border);
+            overflow:hidden;white-space:nowrap;padding:14px 0;
+        }
+        .bless-track{
+            display:inline-block;
+            animation:scrollLeft 38s linear infinite;
+        }
+        .bless-item{
+            display:inline-block;
+            padding:0 28px;
+            font-size:16px;font-weight:600;
+            color:var(--gold);letter-spacing:.08em;
+        }
+        .bless-item::before{content:"✦";color:var(--violet);margin-right:12px}
+        @keyframes scrollLeft{
+            0%{transform:translateX(0)}
+            100%{transform:translateX(-50%)}
+        }
+
+        /* ===== 祝福卡片 ===== */
+        .section{padding:20px 0 60px;position:relative;z-index:2}
+        .section-head{text-align:center;margin-bottom:40px}
+        .section-head h2{font-size:clamp(24px,3.2vw,34px);font-weight:800;letter-spacing:.04em}
+        .section-head h2 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .section-head p{color:var(--text-dim);margin-top:10px;font-size:15px}
+        .bless-grid{
+            display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;
+        }
+        .bless-card{
+            background:var(--card);
+            border:1px solid var(--card-border);
+            border-radius:16px;padding:28px;
+            transition:transform .25s,box-shadow .25s,border-color .25s;
+            position:relative;overflow:hidden;
+        }
+        .bless-card::before{
+            content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:var(--grad);
+            transform:scaleX(0);transform-origin:left;transition:transform .4s;
+        }
+        .bless-card:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(0,0,0,.4);border-color:var(--gold)}
+        .bless-card:hover::before{transform:scaleX(1)}
+        .bless-card .emoji{font-size:32px;margin-bottom:12px;display:block}
+        .bless-card h3{font-size:17px;font-weight:700;margin-bottom:10px;color:var(--gold)}
+        .bless-card p{color:var(--text-dim);font-size:14px;line-height:1.8}
+
+        /* ===== 署名 ===== */
+        .signature{
+            text-align:center;padding:40px 0 20px;
+        }
+        .signature img{width:56px;height:56px;border-radius:12px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(251,191,36,.5))}
+        .signature p{color:var(--text-dim);font-size:14px;letter-spacing:.06em}
+        .signature .org{color:var(--gold);font-weight:700}
+
+        @media(max-width:640px){
+            .hero{padding:50px 0 30px}
+            .bless-card{padding:22px}
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header class="site-header">
+        <a href="/sfqd-club" class="brand">
+            <img src="/static/club/logo.png" alt="算法穹顶社">
+            <span class="brand-name">算法穹顶社</span>
+        </a>
+        <a href="/sfqd-club" class="back-link">← 返回官网</a>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="fireworks">
+            <span class="fw fw1"></span>
+            <span class="fw fw2"></span>
+            <span class="fw fw3"></span>
+            <span class="fw fw4"></span>
+            <span class="fw fw5"></span>
+        </div>
+        <div class="container">
+            <div class="badge">HAPPY TEACHERS' DAY</div>
+            <h1><span class="name">{{ teacher_name }}</span>
+                <span class="small">节日快乐！</span>
+            </h1>
+            <p class="date">9 月 10 日<span class="dot">·</span>教师节快乐<span class="dot">·</span>感谢您的辛勤付出</p>
+        </div>
+    </section>
+
+    <!-- ===== 滚动祝福条 ===== -->
+    <div class="bless-marquee">
+        <div class="bless-track" id="blessTrack">
+            <!-- JS 动态填充，内容重复两遍实现无缝滚动 -->
+        </div>
+    </div>
+
+    <!-- ===== 祝福卡片 ===== -->
+    <section class="section">
+        <div class="container">
+            <div class="section-head">
+                <h2>致 <span class="grad">{{ teacher_name }}</span></h2>
+                <p>愿您桃李满天下，春晖遍四方</p>
+            </div>
+            <div class="bless-grid">
+                <div class="bless-card">
+                    <span class="emoji">🌱</span>
+                    <h3>桃李满天下</h3>
+                    <p>三尺讲台，三寸舌，三寸笔，三千桃李。您用知识的火种，点燃了我们前行的道路。</p>
+                </div>
+                <div class="bless-card">
+                    <span class="emoji">📚</span>
+                    <h3>教诲如春风</h3>
+                    <p>春风化雨，润物无声。您的每一句教导，都化作我们成长路上的灯塔与坐标。</p>
+                </div>
+                <div class="bless-card">
+                    <span class="emoji">💡</span>
+                    <h3>师恩似海深</h3>
+                    <p>师恩如海，浩瀚无涯。感谢您用耐心与智慧，为我们拨开迷雾、指明方向。</p>
+                </div>
+                <div class="bless-card">
+                    <span class="emoji">🌟</span>
+                    <h3>春晖遍四方</h3>
+                    <p>谁言寸草心，报得三春晖。愿您的付出，被岁月温柔以待，被世界铭记于心。</p>
+                </div>
+                <div class="bless-card">
+                    <span class="emoji">🍀</span>
+                    <h3>健康常相伴</h3>
+                    <p>愿您工作顺利、身体健康、笑口常开，每一天都被幸福与喜悦围绕。</p>
+                </div>
+                <div class="bless-card">
+                    <span class="emoji">🏆</span>
+                    <h3>硕果满枝头</h3>
+                    <p>愿您桃李芬芳、硕果累累，在教育的沃土上收获每一份耕耘的喜悦与荣光。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== 署名 ===== -->
+    <div class="signature">
+        <div class="container">
+            <img src="/static/club/logo.png" alt="算法穹顶社">
+            <p><span class="org">算法穹顶社</span> 全体成员 敬上</p>
+        </div>
+    </div>
+
+    <script>
+    (function(){
+        /* 滚动祝福条：内容重复两遍实现无缝循环 */
+        const blessings = [
+            "师恩难忘，教诲永存",
+            "桃李满天下，春晖遍四方",
+            "祝老师节日快乐，身体健康",
+            "三尺讲台育桃李，一支粉笔写春秋",
+            "感谢您的辛勤付出与悉心教导",
+            "愿您工作顺利，万事胜意",
+            "春风化雨润心田，师恩似海记心间",
+            "教师节快乐，致敬最可爱的人"
+        ];
+        const track = document.getElementById('blessTrack');
+        const html = blessings.map(b => `<span class="bless-item">${b}</span>`).join('');
+        track.innerHTML = html + html; // 重复两份，配合 translateX(-50%) 无缝
+    })();
+    </script>
+</body>
+</html>
